@@ -6,6 +6,7 @@ struct
   open Exceptions
   open Ast
   open AstTds
+  open Type
 
   type t1 = Ast.AstSyntax.programme
   type t2 = Ast.AstTds.programme
@@ -173,6 +174,12 @@ and analyse_tds_bloc tds li =
    (* afficher_locale tdsbloc ; *) (* décommenter pour afficher la table locale *)
    nli
 
+let  analyse_tds_param tds (typ,nom) =
+  match chercherLocalement tds nom with
+  | Some _ -> raise (DoubleDeclaration nom)
+  | None -> let ia = info_to_info_ast (InfoVar (nom,Undefined, 0, "") ) in
+            ajouter tds nom ia;
+            (typ,ia)
 
 (* analyse_tds_fonction : AstSyntax.fonction -> AstTds.fonction *)
 (* Paramètre tds : la table des symboles courante *)
@@ -180,8 +187,17 @@ and analyse_tds_bloc tds li =
 (* Vérifie la bonne utilisation des identifiants et tranforme la fonction
 en une fonction de type AstTds.fonction *)
 (* Erreur si mauvaise utilisation des identifiants *)
-let analyse_tds_fonction _maintds (AstSyntax.Fonction(_t,_n,_lp,_li))  =
-  failwith "TO DO"
+let analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li))  =
+  match (chercherLocalement maintds n) with
+  | Some _ -> raise (DoubleDeclaration n)
+  | None -> let info_f = InfoFun (n,Undefined, []) in
+            
+              let info_f_ast = info_to_info_ast info_f in 
+              ajouter maintds n info_f_ast;
+              let tdsfille = creerTDSFille maintds in
+              let nlp = List.map (analyse_tds_param tdsfille) lp in
+              let bli = analyse_tds_bloc tdsfille li in
+              Fonction (t, info_f_ast, nlp, bli)
 
 (* analyser : AstSyntax.ast -> AstTds.ast *)
 (* Paramètre : le programme à analyser *)
