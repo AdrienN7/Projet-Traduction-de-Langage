@@ -32,29 +32,14 @@ struct
         | x -> raise (InfoInattendu "Infovar")
 
 
-(* analyse_tds_expression : AstSyntax.expression -> AstTds.expression *)
-(* Paramètre tds : la table des symboles courante *)
+(* analyse_type_expression : AstTds.expression -> AstType.expression * typ *)
 (* Paramètre e : l'expression à analyser *)
-(* Vérifie la bonne utilisation des identifiants et tranforme l'expression
-en une expression de type AstTds.expression *)
-(* Erreur si mauvaise utilisation des identifiants *)
+(* Vérifie la bonne utilisation des type et tranforme l'AstTds.expression
+en une expression de type AstType.expression et renvoie le type de l'expression *)
+(* Erreur si mauvaise utilisation des types *)
 
 
-(* type expression =
-  (* Appel de fonction représenté par le nom de la fonction et la liste des paramètres réels *)
-  | AppelFonction of string * expression list
-  (* Accès à un identifiant représenté par son nom *)
-  | Ident of string
-  (* Booléen *)
-  | Booleen of bool
-  (* Entier *)
-  | Entier of int
-  (* Opération unaire représentée par l'opérateur et l'opérande *)
-  | Unaire of unaire * expression
-  (* Opération binaire représentée par l'opérateur, l'opérande gauche et l'opérande droite *)
-  | Binaire of binaire * expression * expression *)
-
-let rec analyse_type_expression e = (* failwith "todo"*)
+let rec analyse_type_expression e =
   match e with
   | AstTds.AppelFonction (ia, le) -> let nlet = List.map analyse_type_expression le in
                                      let tr = get_type_return ia in
@@ -92,12 +77,12 @@ let rec analyse_type_expression e = (* failwith "todo"*)
 
 
   
-(* analyse_tds_instruction : AstSyntax.instruction -> tds -> AstTds.instruction *)
-(* Paramètre tds : la table des symboles courante *)
+(* analyse_type_instruction : typ option -> AstTds.instruction -> AstTypeInstruction *)
+(* Paramètre tf : le type attendu de l'instruction *)
 (* Paramètre i : l'instruction à analyser *)
-(* Vérifie la bonne utilisation des identifiants et tranforme l'instruction
-en une instruction de type AstTds.instruction *)
-(* Erreur si mauvaise utilisation des identifiants *)
+(* Vérifie la bonne utilisation des types et tranforme l'instruction de type AstTds.instruction
+en une instruction de type AstType.instruction *)
+(* Erreur si mauvaise utilisation des types *)
 let rec analyse_type_instruction tf i =
   match i with
   | AstTds.Declaration (t, ia, e) ->
@@ -139,12 +124,12 @@ let rec analyse_type_instruction tf i =
       end
   | AstTds.Empty -> Empty
       
-(* analyse_tds_bloc : AstSyntax.bloc -> AstTds.bloc *)
-(* Paramètre tds : la table des symboles courante *)
+(* analyse_type_bloc : typ option -> AstTds.bloc -> AstType.bloc *)
+(* Paramètre tf : : le type retour attendu du bloc *)
 (* Paramètre li : liste d'instructions à analyser *)
-(* Vérifie la bonne utilisation des identifiants et tranforme le bloc
-en un bloc de type AstTds.bloc *)
-(* Erreur si mauvaise utilisation des identifiants *)
+(* Vérifie la bonne utilisation des types et tranforme le bloc de type 
+AstTds.bloc en un bloc de type AstType.bloc *)
+(* Erreur si mauvaise utilisation des types *)
 and analyse_type_bloc tf li =
   List.map (analyse_type_instruction tf) li
 
@@ -155,20 +140,19 @@ let  analyse_tds_param tds (typ,nom) =
             ajouter tds nom ia;
             (typ,ia)
 
-(* analyse_tds_fonction : AstSyntax.fonction -> AstTds.fonction *)
-(* Paramètre tds : la table des symboles courante *)
-(* Paramètre : la fonction à analyser *)
-(* Vérifie la bonne utilisation des identifiants et tranforme la fonction
-en une fonction de type AstTds.fonction *)
-(* Erreur si mauvaise utilisation des identifiants *)
+(* analyse_type_fonctionRetour : AstTds.fonction -> AstType.fonction *)
+(* Paramètre : l'AstTds.fonction à analyser *)
+(* Vérifie la bonne utilisation des type et tranforme la fonction de
+type AstTds.fonction en une fonction de type AstType.fonction *)
+(* Erreur si mauvaise utilisation des types *)
 let analyse_type_fonctionRetour (AstTds.Fonction(t,n,lp,li))  =
   (failwith "TODO")
 
-(* analyser : AstSyntax.ast -> AstTds.ast *)
-(* Paramètre : le programme à analyser *)
-(* Vérifie la bonne utilisation des identifiants et tranforme le programme
-en un programme de type AstTds.ast *)
-(* Erreur si mauvaise utilisation des identifiants *)
+(* analyser : AstTds.ast -> AstType.ast *)
+(* Paramètre : l'AstTds à analyser *)
+(* Vérifie la bonne utilisation des types et tranforme le programme
+de type AstTds.ast en un programme de type AstTds.ast *)
+(* Erreur si mauvaise utilisation des types *)
 let analyser (AstTds.Programme (lf,b)) =
   let nlet = List.map analyse_type_fonctionRetour lf in
   let nb = analyse_type_bloc None b in
