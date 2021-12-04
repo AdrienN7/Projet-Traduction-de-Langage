@@ -31,11 +31,6 @@ struct
         | InfoVar (_,t,_,_) -> t
         | x -> raise (InfoInattendu "Infovar")
 
-  let egalite_type t te =
-    match t with
-    | te -> true
-    | _ -> false
-
 
 (* analyse_tds_expression : AstSyntax.expression -> AstTds.expression *)
 (* Paramètre tds : la table des symboles courante *)
@@ -73,8 +68,10 @@ let rec analyse_type_expression e = (* failwith "todo"*)
   | AstTds.Entier n -> (Entier n, Int)
   | AstTds.Unaire (u, e1) -> let (ne1, te1) = analyse_type_expression e1 in
                               begin match u with
-                              | AstSyntax.Denominateur -> Unaire (Denominateur, ne1), te1
-                              | AstSyntax.Numerateur -> Unaire (Numerateur, ne1), te1
+                              | AstSyntax.Denominateur -> if (te1 = Rat) then Unaire (Denominateur, ne1), te1
+                                                          else raise (TypeInattendu (te1, Rat))
+                              | AstSyntax.Numerateur -> if (te1 = Rat) then Unaire (Numerateur, ne1), te1
+                                                        else raise (TypeInattendu (te1, Rat))
                               end
   | AstTds.Binaire (b, e1, e2) -> begin match b, analyse_type_expression e1, analyse_type_expression e2 with
                                         | AstSyntax.Fraction, (a,Int), (c,Int) -> (Binaire (Fraction, a, c) , Rat)
@@ -106,13 +103,13 @@ let rec analyse_type_instruction tf i =
   | AstTds.Declaration (t, ia, e) ->
       modifier_type_info t ia;
       let (ne, te) = analyse_type_expression e in
-      if (egalite_type t te) then Declaration (ia, ne)
-      else raise (TypeInattendu (t, te))
+      if (t = te) then Declaration (ia, ne)
+      else raise (TypeInattendu (te, t))
   | AstTds.Affectation (n,e) ->
       let t = (get_type n) in
       let (ne,te) = analyse_type_expression e in
-      if (egalite_type t te) then Affectation (n, ne)
-      else raise (TypeInattendu (t, te))
+      if (t = te) then Affectation (n, ne)
+      else raise (TypeInattendu (te, t))
 
   | AstTds.Affichage e -> 
       let (ne,te) = analyse_type_expression e in
