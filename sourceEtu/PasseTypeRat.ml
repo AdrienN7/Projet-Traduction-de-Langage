@@ -68,9 +68,9 @@ let rec analyse_type_expression e = (* failwith "todo"*)
   | AstTds.Entier n -> (Entier n, Int)
   | AstTds.Unaire (u, e1) -> let (ne1, te1) = analyse_type_expression e1 in
                               begin match u with
-                              | AstSyntax.Denominateur -> if (te1 = Rat) then Unaire (Denominateur, ne1), te1
+                              | AstSyntax.Denominateur -> if (est_compatible te1 Rat) then Unaire (Denominateur, ne1), te1
                                                           else raise (TypeInattendu (te1, Rat))
-                              | AstSyntax.Numerateur -> if (te1 = Rat) then Unaire (Numerateur, ne1), te1
+                              | AstSyntax.Numerateur -> if (est_compatible te1 Rat) then Unaire (Numerateur, ne1), te1
                                                         else raise (TypeInattendu (te1, Rat))
                               end
   | AstTds.Binaire (b, e1, e2) -> begin match b, analyse_type_expression e1, analyse_type_expression e2 with
