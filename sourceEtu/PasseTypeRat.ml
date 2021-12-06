@@ -118,7 +118,7 @@ let rec analyse_type_instruction tf i =
   | AstTds.Retour (e) -> 
       let (ne, te) = analyse_type_expression e in
       begin match tf with
-      | None -> raise (TypeInattendu (Undefined, Int))
+      | None -> raise RetourDansMain
       | Some t -> if (t=te) then Retour ne
                   else raise (TypeInattendu (te, t))
       end
