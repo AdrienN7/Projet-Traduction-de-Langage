@@ -141,7 +141,7 @@ let  analyse_type_param  (typ,n) =
 (* Vérifie la bonne utilisation des type et tranforme la fonction de
 type AstTds.fonction en une fonction de type AstType.fonction *)
 (* Erreur si mauvaise utilisation des types *)
-let analyse_type_fonctionRetour (AstTds.Fonction( t,n,lp,li))  =
+let analyse_type_fonctionRetour (AstTds.Fonction(t,n,lp,li))  =
   let tlp = List.map (analyse_type_param) lp in
   let slp = List.map (fun (a,b) -> a) tlp in
   let sn = List.map (fun (a,b) -> b) tlp in
