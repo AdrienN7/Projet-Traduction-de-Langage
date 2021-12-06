@@ -120,7 +120,7 @@ let rec analyse_type_instruction tf i =
       begin match tf with
       | None -> raise (TypeInattendu (Undefined, Int))
       | Some t -> if (t=te) then Retour ne
-                  else raise (TypeInattendu (t, te))
+                  else raise (TypeInattendu (te, t))
       end
   | AstTds.Empty -> Empty
       
