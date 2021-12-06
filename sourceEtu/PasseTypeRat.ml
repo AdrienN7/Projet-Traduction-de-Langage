@@ -1,4 +1,4 @@
-(* Module de la passe de gestion des identifiants *)
+(* Module de la passe de gestion du typage *)
 module PasseTypeRat : Passe.Passe with type t1 = Ast.AstTds.programme and type t2 = Ast.AstType.programme =
 struct
 
@@ -18,7 +18,7 @@ struct
       | InfoFun (_, _, tl) -> tl
       | x -> raise (InfoInattendu "InfoFun")
       
-  (*le type que la fonction retourn*)
+  (*le type que la fonction retourne*)
   (*paramètre ia : info ast*) 
   let get_type_return ia =  
         match info_ast_to_info ia with
@@ -46,11 +46,15 @@ let rec analyse_type_expression e =
                                      let tpara = get_type_param ia in
                                      let nle = List.map fst nlet in
                                      let nlt = List.map snd nlet in
+                                        (* Vérification du bon typage des paramètres *)
                                         if (tpara = nlt) then ((AppelFonction (ia, nle)), tr)
                                         else raise (TypesParametresInattendus (nlt,tpara))
   | AstTds.Ident ia -> ((Ident ia), get_type ia)
   | AstTds.Booleen n -> (Booleen n, Bool)
   | AstTds.Entier n -> (Entier n, Int)
+
+   (* Résolution de la surcharge sur les opérateurs unaires *)
+  (* Erreur si type et opération incomaptibles *)
   | AstTds.Unaire (u, e1) -> let (ne1, te1) = analyse_type_expression e1 in
                               begin match u with
                               | AstSyntax.Denominateur -> if (est_compatible te1 Rat) then Unaire (Denominateur, ne1), Int
@@ -58,6 +62,9 @@ let rec analyse_type_expression e =
                               | AstSyntax.Numerateur -> if (est_compatible te1 Rat) then Unaire (Numerateur, ne1), Int
                                                         else raise (TypeInattendu (te1, Rat))
                               end
+  
+  (* Résolution de la surcharge sur les opérateurs binaires *)
+  (* Erreur si types et opération incomaptibles *)
   | AstTds.Binaire (b, e1, e2) -> begin match b, analyse_type_expression e1, analyse_type_expression e2 with
                                         | AstSyntax.Fraction, (a,Int), (c,Int) -> (Binaire (Fraction, a, c) , Rat)
                                         | AstSyntax.Fraction, (_,a), (_,c)-> raise (TypeBinaireInattendu (Fraction, a, c))
@@ -96,6 +103,8 @@ let rec analyse_type_instruction tf i =
       if (t = te) then Affectation (n, ne)
       else raise (TypeInattendu (te, t))
 
+  (* Résolution de la surcharge sur l'affichage *)
+  (* Erreur si types indéfines *)
   | AstTds.Affichage e -> 
       let (ne,te) = analyse_type_expression e in
         begin match te with
@@ -133,6 +142,9 @@ AstTds.bloc en un bloc de type AstType.bloc *)
 and analyse_type_bloc tf li =
   List.map (analyse_type_instruction tf) li
 
+(* analyse_type_param : type * info_ast -> type * info_ast *)
+(* Paramètre : liste des paramètre de la fonction *)
+(* modifie l'ast avec les bon paramètres *)
 let  analyse_type_param  (typ,n) =
   modifier_type_info typ n;
   (typ,n)
