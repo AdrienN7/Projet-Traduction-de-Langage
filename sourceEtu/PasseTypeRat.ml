@@ -133,20 +133,21 @@ AstTds.bloc en un bloc de type AstType.bloc *)
 and analyse_type_bloc tf li =
   List.map (analyse_type_instruction tf) li
 
-let  analyse_tds_param tds (typ,nom) =
-  match chercherLocalement tds nom with
-  | Some _ -> raise (DoubleDeclaration nom)
-  | None -> let ia = info_to_info_ast (InfoVar (nom,Undefined, 0, "") ) in
-            ajouter tds nom ia;
-            (typ,ia)
-
+let  analyse_type_param  (typ,n) =
+  modifier_type_info typ n;
+  (typ,n)
 (* analyse_type_fonctionRetour : AstTds.fonction -> AstType.fonction *)
 (* Paramètre : l'AstTds.fonction à analyser *)
 (* Vérifie la bonne utilisation des type et tranforme la fonction de
 type AstTds.fonction en une fonction de type AstType.fonction *)
 (* Erreur si mauvaise utilisation des types *)
-let analyse_type_fonctionRetour (AstTds.Fonction(t,n,lp,li))  =
-  (failwith "TODO")
+let analyse_type_fonctionRetour (AstTds.Fonction( t,n,lp,li))  =
+  let tlp = List.map (analyse_type_param) lp in
+  let slp = List.map (fun (a,b) -> a) tlp in
+  let sn = List.map (fun (a,b) -> b) tlp in
+  modifier_type_fonction_info t slp n;
+  let nli = analyse_type_bloc (Some t) li in
+  Fonction (n,sn,nli)
 
 (* analyser : AstTds.ast -> AstType.ast *)
 (* Paramètre : l'AstTds à analyser *)

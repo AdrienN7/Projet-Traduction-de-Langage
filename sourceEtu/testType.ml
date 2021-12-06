@@ -425,7 +425,7 @@ let _ = compiler   "../../fichiersRat/src-rat-tam-test/complique.rat" in ()
 (* Avec fonction                  *)
 (* ------------------------------ *)
 
-(*
+
 let%test_unit "test2"= 
   let _ = compiler "../../fichiersRat/src-rat-type-test/test2.rat" in ()
 
@@ -559,4 +559,4 @@ let%test_unit "code_testfun6" =
 let%test_unit "code_testfuns" = 
 let _ = compiler   "../../fichiersRat/src-rat-tam-test/testfuns.rat" in ()
 
-*)
+
