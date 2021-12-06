@@ -71,8 +71,8 @@ let rec analyse_param dep rlp =
   match rlp with
   | [] -> []
   | ia::q -> let t = (get_taille (get_type ia)) in
-             modifier_adresse_info (dep - 1) "LB" ia;
-             ia::(analyse_param (dep - 1) q)
+             modifier_adresse_info (dep - t) "LB" ia;
+             ia::(analyse_param (dep - t) q)
 (* analyse_type_fonctionRetour : AstTds.fonction -> AstType.fonction *)
 (* Paramètre : l'AstTds.fonction à analyser *)
 (* Vérifie la bonne utilisation des type et tranforme la fonction de
