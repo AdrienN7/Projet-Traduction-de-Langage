@@ -16,20 +16,20 @@ struct
   let get_type_param ia =  
       match info_ast_to_info ia with
       | InfoFun (_, _, tl) -> tl
-      | x -> raise (InfoInattendu "InfoFun")
+      | _ -> raise (InfoInattendu "InfoFun")
       
   (*le type que la fonction retourne*)
   (*paramètre ia : info ast*) 
   let get_type_return ia =  
         match info_ast_to_info ia with
         | InfoFun (_,t,_) -> t
-        | x -> raise (InfoInattendu "InfoFun")
+        | _ -> raise (InfoInattendu "InfoFun")
   (*retourne le type*)
   (*paramètre ia : info ast*) 
   let get_type ia =  
         match info_ast_to_info ia with
         | InfoVar (_,t,_,_) -> t
-        | x -> raise (InfoInattendu "Infovar")
+        | _ -> raise (InfoInattendu "Infovar")
 
 
 (* analyse_type_expression : AstTds.expression -> AstType.expression * typ *)
@@ -155,8 +155,8 @@ type AstTds.fonction en une fonction de type AstType.fonction *)
 (* Erreur si mauvaise utilisation des types *)
 let analyse_type_fonctionRetour (AstTds.Fonction(t,n,lp,li))  =
   let tlp = List.map (analyse_type_param) lp in
-  let slp = List.map (fun (a,b) -> a) tlp in
-  let sn = List.map (fun (a,b) -> b) tlp in
+  let slp = List.map (fun (a,_) -> a) tlp in
+  let sn = List.map (fun (_,b) -> b) tlp in
   modifier_type_fonction_info t slp n;
   let nli = analyse_type_bloc (Some t) li in
   Fonction (n,sn,nli)

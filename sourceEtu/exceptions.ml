@@ -1,6 +1,5 @@
 open Type
 open Ast.AstSyntax
-open Tds
 (* Exceptions pour la gestion des identificateurs *)
 exception DoubleDeclaration of string 
 exception IdentifiantNonDeclare of string 

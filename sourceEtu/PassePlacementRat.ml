@@ -16,7 +16,7 @@ struct
   let get_type ia =  
     match info_ast_to_info ia with
     | InfoVar (_,t,_,_) -> t
-    | x -> raise (InfoInattendu "Infovar")
+    | _ -> raise (InfoInattendu "Infovar")
 
   let get_taille t =
     match t with
@@ -40,12 +40,12 @@ en une instruction de type AstType.instruction *)
 (* Erreur si mauvaise utilisation des types *)
 let rec analyse_instruction reg dep i =
   match i with
-  | AstType.Declaration (ia, e) -> let a = (get_taille (get_type ia)) in
+  | AstType.Declaration (ia, _) -> let a = (get_taille (get_type ia)) in
                                    modifier_adresse_info dep reg ia;
                                    (i, dep + a)
-  | AstType.TantQue (e,b) -> let nb = (analyser_bloc reg dep b) in
+  | AstType.TantQue (_,b) -> let _ = (analyser_bloc reg dep b) in
                              (i, dep)
-  | AstType.Conditionnelle (e, bt, be) -> let _ = (analyser_bloc reg dep bt) in
+  | AstType.Conditionnelle (_, bt, be) -> let _ = (analyser_bloc reg dep bt) in
                                           let _ = (analyser_bloc reg dep be) in
                                           (i, dep)
   | _ -> (i,dep)
