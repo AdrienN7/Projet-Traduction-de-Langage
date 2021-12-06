@@ -46,7 +46,7 @@ let rec analyse_instruction reg dep i =
   | AstType.TantQue (e,b) -> let nb = (analyser_bloc reg dep b) in
                              (i, dep)
   | AstType.Conditionnelle (e, bt, be) -> let _ = (analyser_bloc reg dep bt) in
-                                          let _ = (analyser_bloc reg dep bt) in
+                                          let _ = (analyser_bloc reg dep be) in
                                           (i, dep)
   | _ -> (i,dep)
 
