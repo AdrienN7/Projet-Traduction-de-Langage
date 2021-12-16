@@ -128,7 +128,8 @@ let analyser_tam_fonction (Fonction(ia,lp,b))  =
   let tparam = (List.fold_right (fun x y -> (get_taille (get_type x)) + y) lp 0) in
   match (info_ast_to_info ia) with
   | InfoFun (nf, tf, tlv) -> nf^"\n"
-                             ^(analyser_tam_bloc b (get_taille tf) tparam)^"\n"
+                            ^(analyser_tam_bloc b (get_taille tf) tparam)^"\n"
+                            ^"HALT\n"
   | _ -> raise (InfoInattendu "InfoFun")
 
 
