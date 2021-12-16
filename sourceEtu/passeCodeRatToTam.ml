@@ -46,7 +46,7 @@ let rec analyser_tam_expression e =
                                             (List.fold_right (fun x y -> (analyser_tam_expression x)^"\n"^y) b "")
                                   ^"CALL (SB) "^nom^"\n"
   | Ident (id_info) -> let (dep,reg) = (get_dep_reg id_info) in
-                       "LOAD "^(string_of_int (get_taille (get_type id_info)))^" "
+                       "LOAD ("^(string_of_int (get_taille (get_type id_info)))^") "
                        ^(string_of_int dep)^"["^reg^"]\n"
   | Booleen (bool) -> if bool then "LOADL 1\n" else "LOADL 0\n"
   | Entier (ent) -> "LOADL "^(string_of_int ent)^"\n"
@@ -68,7 +68,7 @@ let rec analyser_tam_expression e =
                             end in
                           (analyser_tam_expression e1)^"\n"
                            ^(analyser_tam_expression e2)^"\n"
-                           ^typa
+                           ^typa^"\n"
 
 let rec analyse_tam_instruction i ttr tparam =
   match i with
@@ -76,16 +76,16 @@ let rec analyse_tam_instruction i ttr tparam =
                           let (dep,reg) = (get_dep_reg n) in
 "PUSH "^(string_of_int taille)^"\n"
 ^(analyser_tam_expression e)
-^"STORE "^(string_of_int taille)^" "^(string_of_int dep)^"["^reg^"]\n"
+^"STORE ("^(string_of_int taille)^") "^(string_of_int dep)^"["^reg^"]\n"
 
   | Affectation (n, e) -> let (dep,reg) = (get_dep_reg n) in
-                          (analyser_tam_expression e)^"\n"^"STORE "^(string_of_int (get_taille (get_type n)))^" "^(string_of_int dep)^"["^reg^"]\n"
+                          (analyser_tam_expression e)^"\n"^"STORE ("^(string_of_int (get_taille (get_type n)))^") "^(string_of_int dep)^"["^reg^"]\n"
   | AffichageInt e -> (analyser_tam_expression e)^"\n"^"SUBR IOut\n"
   | AffichageRat e -> (analyser_tam_expression e)^"\n"^"CALL (SB) ROut\n"
   | AffichageBool e -> (analyser_tam_expression e)^"\n"^"SUBR Bout\n"
   | Conditionnelle (e,bt,be) -> let etiquetElse = (getEtiquette ()) in
                                 let etiquetFin = (getEtiquette ()) in
-                                (analyser_tam_expression e)^"\n"^"JUMPIF (1) "^etiquetElse^"\n"
+                                (analyser_tam_expression e)^"\n"^"JUMPIF (0) "^etiquetElse^"\n"
                                 ^(analyser_tam_bloc bt 0 0)
                                 ^"JUMP "^etiquetFin^"\n"
                                 ^etiquetElse^"\n"
@@ -98,7 +98,7 @@ let rec analyse_tam_instruction i ttr tparam =
                       ^"JUMPIF (0) "^etiquetFin^"\n"
                       ^(analyser_tam_bloc b 0 0)^"\n"
                       ^"JUMP "^etiquetWhile^"\n"
-                      ^etiquetFin
+                      ^etiquetFin^"\n"
   | Retour e -> (analyser_tam_expression e)^"\n"
                 ^"RETURN "^(string_of_int ttr)^" "^(string_of_int tparam)
   | Empty -> ""
