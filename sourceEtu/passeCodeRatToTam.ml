@@ -100,7 +100,7 @@ let rec analyse_tam_instruction i ttr tparam =
                       ^"JUMP "^etiquetWhile^"\n"
                       ^etiquetFin^"\n"
   | Retour e -> (analyser_tam_expression e)^"\n"
-                ^"RETURN "^(string_of_int ttr)^" "^(string_of_int tparam)
+                ^"RETURN ("^(string_of_int ttr)^") "^(string_of_int tparam)^"\n"
   | Empty -> ""
 
 
@@ -124,7 +124,12 @@ let rec analyse_tam_param dep rlp = ""
 (* Vérifie la bonne utilisation des type et tranforme la fonction de
 type AstTds.fonction en une fonction de type AstType.fonction *)
 (* Erreur si mauvaise utilisation des types *)
-let analyser_tam_fonction (Fonction(ia,lp,b))  = ""
+let analyser_tam_fonction (Fonction(ia,lp,b))  = 
+  let tparam = (List.fold_right (fun x y -> (get_taille (get_type x)) + y) lp 0) in
+  match (info_ast_to_info ia) with
+  | InfoFun (nf, tf, tlv) -> nf^"\n"
+                             ^(analyser_tam_bloc b (get_taille tf) tparam)^"\n"
+  | _ -> raise (InfoInattendu "InfoFun")
 
 
 
