@@ -83,7 +83,7 @@ let rec analyse_tds_instruction tds i =
             (* et obtention de l'expression transformée *) 
             let ne = analyse_tds_expression tds e in
             (* Création de l'information associée à l'identfiant *)
-            let info = InfoVar (n,Undefined, 0, "") in
+            let info = InfoVar (n,t, 0, "") in
             (* Création du pointeur sur l'information *)
             let ia = info_to_info_ast info in
             (* Ajout de l'information (pointeur) dans la tds *)
@@ -181,7 +181,7 @@ and analyse_tds_bloc tds li =
 let  analyse_tds_param tds (typ,nom) =
   match chercherLocalement tds nom with
   | Some _ -> raise (DoubleDeclaration nom)
-  | None -> let ia = info_to_info_ast (InfoVar (nom,Undefined, 0, "") ) in
+  | None -> let ia = info_to_info_ast (InfoVar (nom,typ, 0, "") ) in
             ajouter tds nom ia;
             (typ,ia)
 
@@ -194,7 +194,7 @@ en une fonction de type AstTds.fonction *)
 let analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li))  =
   match (chercherLocalement maintds n) with
   | Some _ -> raise (DoubleDeclaration n)
-  | None -> let info_f = InfoFun (n,Undefined, []) in
+  | None -> let info_f = InfoFun (n,t, []) in
             
               let info_f_ast = info_to_info_ast info_f in 
               ajouter maintds n info_f_ast;

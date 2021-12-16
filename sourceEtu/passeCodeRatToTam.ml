@@ -25,7 +25,10 @@ struct
     | Rat -> 2
     | _ -> 1
     
-  let taille_variables_locales li = 0
+  let taille_variables i = 
+    match i with
+    | AstType.Declaration (n, e) -> (get_taille (get_type n))
+    | _ -> 0
 
   
   let get_dep_reg ia =
@@ -35,7 +38,13 @@ struct
 
 let rec analyser_tam_expression e =
   match e with
-  | AstType.AppelFonction (n,b) -> ""
+  | AstType.AppelFonction (n,b) -> let nom = begin 
+                                            match info_ast_to_info n with
+                                            | InfoFun(nf, _, _) -> nf
+                                            | _ -> raise (InfoInattendu "infoVar")
+                                            end in
+                                            (List.fold_right (fun x y -> (analyser_tam_expression x)^"\n"^y) b "")
+                                  ^"CALL (SB) "^nom^"\n"
   | Ident (id_info) -> let (dep,reg) = (get_dep_reg id_info) in
                        "LOAD "^(string_of_int (get_taille (get_type id_info)))^" "
                        ^(string_of_int dep)^"["^reg^"]\n"
@@ -98,9 +107,10 @@ let rec analyse_tam_instruction i ttr tparam =
       
 
 and analyser_tam_bloc li ttr tparam =
-(List.fold_right (fun x y -> (analyse_tam_instruction x ttr tparam)^y,taille_variables) li "")
+let (bloc_tam, tp) = (List.fold_right (fun x (y,w) -> (analyse_tam_instruction x ttr tparam)^y,(taille_variables x) + w) li ("",0)) in
+bloc_tam
 ^"POP (0) "
-^(string_of_int (taille_variables_locales li))
+^(string_of_int (tp))
 ^"\n"
 
 
