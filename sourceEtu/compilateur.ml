@@ -50,7 +50,7 @@ module CompilateurRat = Compilateur (PasseTdsRat) (PasseTypeRat) (PassePlacement
 *)
 
 (* + passe de placement mémoire *)
-(*)
+(*
 open PasseTdsRat
 open PasseTypeRat
 open PassePlacementRat

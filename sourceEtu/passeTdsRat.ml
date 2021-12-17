@@ -6,7 +6,6 @@ struct
   open Exceptions
   open Ast
   open AstTds
-  open Type
 
   type t1 = Ast.AstSyntax.programme
   type t2 = Ast.AstTds.programme

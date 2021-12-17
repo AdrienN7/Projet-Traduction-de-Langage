@@ -27,7 +27,7 @@ struct
     
   let taille_variables i = 
     match i with
-    | AstType.Declaration (n, e) -> (get_taille (get_type n))
+    | AstType.Declaration (n, _) -> (get_taille (get_type n))
     | _ -> 0
 
   
@@ -114,11 +114,6 @@ bloc_tam
 ^"\n"
 
 
-(* analyse_type_param : type * info_ast -> type * info_ast *)
-(* Paramètre : liste des paramètre de la fonction *)
-(* modifie l'ast avec les bon paramètres *)
-let rec analyse_tam_param dep rlp = ""
-
 (* analyse_type_fonctionRetour : AstTds.fonction -> AstType.fonction *)
 (* Paramètre : l'AstTds.fonction à analyser *)
 (* Vérifie la bonne utilisation des type et tranforme la fonction de
@@ -127,7 +122,7 @@ type AstTds.fonction en une fonction de type AstType.fonction *)
 let analyser_tam_fonction (Fonction(ia,lp,b))  = 
   let tparam = (List.fold_right (fun x y -> (get_taille (get_type x)) + y) lp 0) in
   match (info_ast_to_info ia) with
-  | InfoFun (nf, tf, tlv) -> nf^"\n"
+  | InfoFun (nf, tf, _) -> nf^"\n"
                             ^(analyser_tam_bloc b (get_taille tf) tparam)^"\n"
                             ^"HALT\n"
   | _ -> raise (InfoInattendu "InfoFun")
