@@ -47,7 +47,7 @@ let rec analyser_tam_expression e =
                                   ^"CALL (SB) "^nom^"\n"
   | Ident (id_info) -> let (dep,reg) = (get_dep_reg id_info) in
                        "LOAD ("^(string_of_int (get_taille (get_type id_info)))^") "
-                       ^(string_of_int dep)^"["^reg^"]\n"
+                       ^(string_of_int dep)^"["^reg^"]"
   | Booleen (bool) -> if bool then "LOADL 1\n" else "LOADL 0\n"
   | Entier (ent) -> "LOADL "^(string_of_int ent)^"\n"
   | Unaire (u,exp) -> let typa = begin match u with
@@ -86,17 +86,17 @@ let rec analyse_tam_instruction i ttr tparam =
   | Conditionnelle (e,bt,be) -> let etiquetElse = (getEtiquette ()) in
                                 let etiquetFin = (getEtiquette ()) in
                                 (analyser_tam_expression e)^"\n"^"JUMPIF (0) "^etiquetElse^"\n"
-                                ^(analyser_tam_bloc bt 0 0)
+                                ^(analyser_tam_bloc bt ttr tparam)
                                 ^"JUMP "^etiquetFin^"\n"
                                 ^etiquetElse^"\n"
-                                ^(analyser_tam_bloc be 0 0)
+                                ^(analyser_tam_bloc be ttr tparam)
                                 ^etiquetFin^"\n"
   | TantQue (e,b) -> let etiquetWhile = (getEtiquette ()) in
                       let etiquetFin = (getEtiquette ()) in
                       etiquetWhile^"\n"
                       ^(analyser_tam_expression e)^"\n"
                       ^"JUMPIF (0) "^etiquetFin^"\n"
-                      ^(analyser_tam_bloc b 0 0)^"\n"
+                      ^(analyser_tam_bloc b ttr tparam)^"\n"
                       ^"JUMP "^etiquetWhile^"\n"
                       ^etiquetFin^"\n"
   | Retour e -> (analyser_tam_expression e)^"\n"
@@ -119,12 +119,12 @@ bloc_tam
 (* Vérifie la bonne utilisation des type et tranforme la fonction de
 type AstTds.fonction en une fonction de type AstType.fonction *)
 (* Erreur si mauvaise utilisation des types *)
-let analyser_tam_fonction (Fonction(ia,lp,b))  = 
-  let tparam = (List.fold_right (fun x y -> (get_taille (get_type x)) + y) lp 0) in
+let analyser_tam_fonction (Fonction(ia,_,b))  = 
   match (info_ast_to_info ia) with
-  | InfoFun (nf, tf, _) -> nf^"\n"
-                            ^(analyser_tam_bloc b (get_taille tf) tparam)^"\n"
-                            ^"HALT\n"
+  | InfoFun (nf, tf, lpf) -> let tparams = (List.fold_right (fun x y -> (get_taille x) + y) lpf 0) in
+                            nf^"\n"
+                            ^(analyser_tam_bloc b (get_taille tf) tparams)^"\n"
+                            ^"HALT\n\n\n"
   | _ -> raise (InfoInattendu "InfoFun")
 
 
