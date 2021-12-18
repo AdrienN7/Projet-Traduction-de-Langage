@@ -124,7 +124,7 @@ let analyser_tam_fonction (Fonction(ia,_,b))  =
   | InfoFun (nf, tf, lpf) -> let tparams = (List.fold_right (fun x y -> (get_taille x) + y) lpf 0) in
                             nf^"\n"
                             ^(analyser_tam_bloc b (get_taille tf) tparams)^"\n"
-                            ^"HALT\n\n\n"
+                            ^"HALT\n"
   | _ -> raise (InfoInattendu "InfoFun")
 
 
