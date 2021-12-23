@@ -37,6 +37,11 @@ open Ast.AstSyntax
 %token INF
 %token EOF
 
+(* ajout des pointeurs *)
+%token ET
+%token NEW
+%token NULL
+
 (* Type de l'attribut synthétisé des non-terminaux *)
 %type <programme> prog
 %type <instruction list> bloc
