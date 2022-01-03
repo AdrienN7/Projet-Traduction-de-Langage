@@ -16,6 +16,12 @@ end
 module AstSyntax =
 struct
 
+(***************)
+(* Affectables *)
+type affectable =
+  | Deref of affectable
+  | Ident of string
+
 (* Opérateurs unaires de Rat *)
 type unaire = Numerateur | Denominateur
 
@@ -26,8 +32,7 @@ type binaire = Fraction | Plus | Mult | Equ | Inf
 type expression =
   (* Appel de fonction représenté par le nom de la fonction et la liste des paramètres réels *)
   | AppelFonction of string * expression list
-  (* Accès à un identifiant représenté par son nom *)
-  | Ident of string
+
   (* Booléen *)
   | Booleen of bool
   (* Entier *)
@@ -36,14 +41,17 @@ type expression =
   | Unaire of unaire * expression
   (* Opération binaire représentée par l'opérateur, l'opérande gauche et l'opérande droite *)
   | Binaire of binaire * expression * expression
+  (**** ajout pour les pointeurs ****)
+  | Null
+  | Affectable of affectable
+  | Adresse of string
+  | New of typ
 
 (* Instructions de Rat *)
 type bloc = instruction list
 and instruction =
   (* Déclaration de variable représentée par son type, son nom et l'expression d'initialisation *)
   | Declaration of typ * string * expression
-  (* Affectation d'une variable représentée par son nom et la nouvelle valeur affectée *)
-  | Affectation of string * expression
   (* Déclaration d'une constante représentée par son nom et sa valeur (entier) *)
   | Constante of string * int
   (* Affichage d'une expression *)
@@ -54,6 +62,10 @@ and instruction =
   | TantQue of expression * bloc
   (* return d'une fonction *)
   | Retour of expression
+  (**** ajout pour les pointeurs ****)
+  | Affectation of affectable * expression
+
+
 
 (* Structure des fonctions de Rat *)
 (* type de retour - nom - liste des paramètres (association type et nom) - corps de la fonction *)
@@ -72,6 +84,11 @@ end
 module AstTds =
 struct
 
+  (* ajout pour les pointeurs *)
+  type affectable =
+    | Deref of AstSyntax.affectable
+    | Ident of Tds.info_ast
+
   (* Expressions existantes dans notre langage *)
   (* ~ expression de l'AST syntaxique où les noms des identifiants ont été
   remplacés par les informations associées aux identificateurs *)
@@ -82,6 +99,11 @@ struct
     | Entier of int
     | Unaire of AstSyntax.unaire * expression
     | Binaire of AstSyntax.binaire * expression * expression
+    (**** ajout pour les pointeurs ****)
+    | Null
+    | Affectable of AstSyntax.affectable
+    | Adresse of Tds.info_ast
+    | New of typ
 
   (* instructions existantes dans notre langage *)
   (* ~ instruction de l'AST syntaxique où les noms des identifiants ont été
@@ -90,12 +112,13 @@ struct
   type bloc = instruction list
   and instruction =
     | Declaration of typ * Tds.info_ast * expression (* le nom de l'identifiant est remplacé par ses informations *)
-    | Affectation of  Tds.info_ast * expression (* le nom de l'identifiant est remplacé par ses informations *)
     | Affichage of expression
     | Conditionnelle of expression * bloc * bloc
     | TantQue of expression * bloc
     | Retour of expression
     | Empty (* les nœuds ayant disparus: Const *)
+    (**** modification pour les pointeurs ****)
+    | Affectation of AstSyntax.affectable * expression
 
 
   (* Structure des fonctions dans notre langage *)
