@@ -86,7 +86,7 @@ struct
 
   (* ajout pour les pointeurs *)
   type affectable =
-    | Deref of AstSyntax.affectable
+    | Deref of affectable
     | Ident of Tds.info_ast
 
   (* Expressions existantes dans notre langage *)
@@ -101,7 +101,7 @@ struct
     | Binaire of AstSyntax.binaire * expression * expression
     (**** ajout pour les pointeurs ****)
     | Null
-    | Affectable of AstSyntax.affectable
+    | Affectable of affectable
     | Adresse of Tds.info_ast
     | New of typ
 
@@ -118,7 +118,7 @@ struct
     | Retour of expression
     | Empty (* les nœuds ayant disparus: Const *)
     (**** modification pour les pointeurs ****)
-    | Affectation of AstSyntax.affectable * expression
+    | Affectation of affectable * expression
 
 
   (* Structure des fonctions dans notre langage *)

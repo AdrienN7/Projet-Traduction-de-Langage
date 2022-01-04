@@ -18,6 +18,23 @@ struct
 en une expression de type AstTds.expression *)
 (* Erreur si mauvaise utilisation des identifiants *)
 
+let rec analyse_tds_affectable tds a =
+  match a with
+ | AstSyntax.Deref a1 -> Deref(analyse_tds_affectable tds a1)
+ | AstSyntax.Ident n -> 
+ begin
+      match (chercherGlobalement tds n) with
+      | None ->  raise (IdentifiantNonDeclare n)
+      | Some ia -> 
+        begin  
+          match (info_ast_to_info ia) with
+          | InfoConst (_,m) -> Entier(m)
+          | InfoVar _ -> Ident(ia)
+          | InfoFun _ -> raise (MauvaiseUtilisationIdentifiant n)
+        end
+
+    end
+
 
 (* type expression =
   (* Appel de fonction représenté par le nom de la fonction et la liste des paramètres réels *)
@@ -45,19 +62,21 @@ let rec analyse_tds_expression tds e = (* failwith "todo"*)
                       | _ -> raise (MauvaiseUtilisationIdentifiant n)
          end
     end
-  | AstSyntax.Ident n -> 
-    begin
+  | AstSyntax.Affectable a1 -> Affectable(analyse_tds_affectable tds a1)  
+  | AstSyntax.Null -> Null 
+  | AstSyntax.New t -> New (t)
+  | AstSyntax.Adresse n ->
+  begin
       match (chercherGlobalement tds n) with
       | None ->  raise (IdentifiantNonDeclare n)
       | Some ia -> 
         begin  
           match (info_ast_to_info ia) with
           | InfoConst (_,m) -> Entier(m)
-          | InfoVar _ -> Ident(ia)
-          | InfoFun _ -> raise (MauvaiseUtilisationIdentifiant n)
+          | _ -> raise (MauvaiseUtilisationIdentifiant n)
         end
 
-    end
+    end     
   | AstSyntax.Booleen n -> Booleen (n)
   | AstSyntax.Entier n -> Entier (n)
   | AstSyntax.Unaire (u, e1) -> Unaire (u, (analyse_tds_expression tds e1))
@@ -159,6 +178,10 @@ let rec analyse_tds_instruction tds i =
       (* Analyse de l'expression *)
       let ne = analyse_tds_expression tds e in
       Retour (ne)
+  | AstSyntax.Affectation (a,e) ->
+      let ne = analyse_tds_expression tds e in
+      let na = analyse_tds_affectable tds a in
+      Affectation(na, ne)
 
       
 (* analyse_tds_bloc : AstSyntax.bloc -> AstTds.bloc *)

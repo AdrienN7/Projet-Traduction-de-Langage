@@ -52,6 +52,8 @@ open Ast.AstSyntax
 %type <(typ*string) list> dp
 %type <expression> e 
 %type <expression list> cp
+%type <affectable> a (* ajout de l'affectable *)
+
 
 (* Type et définition de l'axiome *)
 %start <Ast.AstSyntax.programme> main
@@ -81,6 +83,10 @@ i :
 | WHILE exp=e li=bloc               {TantQue (exp,li)}
 | RETURN exp=e PV                   {Retour (exp)}
 
+a : (*implentation de l'affectable*)
+| n=ID       {Ident (n)} 
+| PO MULT a1=a  {Deref (a1)} 
+
 dp :
 |                         {[]}
 | t=typ n=ID lp=dp        {(t,n)::lp}
@@ -89,11 +95,13 @@ typ :
 | BOOL    {Bool}
 | INT     {Int}
 | RAT     {Rat}
+| t=typ MULT {Pointeurs (t)} (* Ajout du typ pointeurs*)
+
 
 e : 
 | CALL n=ID PO lp=cp PF   {AppelFonction (n,lp)}
 | CO e1=e SLASH e2=e CF   {Binaire(Fraction,e1,e2)}
-| n=ID                    {Ident n}
+(* n=ID                    {Ident n}*) (*on supprime l'expression identifiant*)
 | TRUE                    {Booleen true}
 | FALSE                   {Booleen false}
 | e=ENTIER                {Entier e}
@@ -104,6 +112,13 @@ e :
 | PO e1=e EQUAL e2=e PF   {Binaire (Equ,e1,e2)}
 | PO e1=e INF e2=e PF     {Binaire (Inf,e1,e2)}
 | PO exp=e PF             {exp}
+| a1=a                    {Affectable (a1)}  (* ajout des différentes expression pour le pointeur*)
+| NULL                    {Null}  
+| PO NEW t=typ PF         {New (t)}    
+| ET n=ID                 {Adresse (n)} 
+
+
+
 
 cp :
 |               {[]}
