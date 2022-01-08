@@ -18,11 +18,6 @@ struct
     | InfoVar (_,t,_,_) -> t
     | _ -> raise (InfoInattendu "Infovar")
 
-  let get_taille t =
-    match t with
-    | Rat -> 2
-    | _ -> 1
-
 
 (* analyse_placement_expression : AstType.expression -> AstPlacement.expression * typ *)
 (* Paramètre e : l'expression à analyser *)
@@ -40,7 +35,7 @@ en une instruction de type AstType.instruction *)
 (* Erreur si mauvaise utilisation des types *)
 let rec analyse_instruction reg dep i =
   match i with
-  | AstType.Declaration (ia, _) -> let a = (get_taille (get_type ia)) in
+  | AstType.Declaration (ia, _) -> let a = (getTaille (get_type ia)) in
                                    modifier_adresse_info dep reg ia;
                                    (i, dep + a)
   | AstType.TantQue (_,b) -> let _ = (analyser_bloc reg dep b) in
@@ -70,7 +65,7 @@ and analyser_bloc reg dep li =
 let rec analyse_param dep rlp =
   match rlp with
   | [] -> []
-  | ia::q -> let t = (get_taille (get_type ia)) in
+  | ia::q -> let t = (getTaille (get_type ia)) in
              modifier_adresse_info (dep - t) "LB" ia;
              ia::(analyse_param (dep - t) q)
 (* analyse_type_fonctionRetour : AstTds.fonction -> AstType.fonction *)

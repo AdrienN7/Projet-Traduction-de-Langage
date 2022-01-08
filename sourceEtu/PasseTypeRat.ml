@@ -1,4 +1,4 @@
-(*(* Module de la passe de gestion du typage *)
+(* Module de la passe de gestion du typage *)
 module PasseTypeRat : Passe.Passe with type t1 = Ast.AstTds.programme and type t2 = Ast.AstType.programme =
 struct
 
@@ -10,7 +10,8 @@ struct
 
   type t1 = Ast.AstTds.programme
   type t2 = Ast.AstType.programme
-  
+
+
   (*list des types de param*)
   (*paramètre ia : info ast*) 
   let get_type_param ia =  
@@ -32,6 +33,19 @@ struct
         | _ -> raise (InfoInattendu "Infovar")
 
 
+  let rec analyse_type_affectable a modif=
+    match a with
+    | AstTds.Deref a1 -> analyse_type_affectable a1 modif
+    | AstTds.Ident ia -> begin  
+                  match (info_ast_to_info ia) with
+                  | InfoConst (n,_) -> if modif then raise (MauvaiseUtilisationIdentifiant n)
+                                        else (Ident(ia), Int)
+                  | InfoVar _ -> (Ident(ia), get_type ia)
+                  | InfoFun (n, _, _) -> raise (MauvaiseUtilisationIdentifiant n)
+                  end
+    (Ident ia, get_type ia)
+
+
 (* analyse_type_expression : AstTds.expression -> AstType.expression * typ *)
 (* Paramètre e : l'expression à analyser *)
 (* Vérifie la bonne utilisation des type et tranforme l'AstTds.expression
@@ -49,7 +63,6 @@ let rec analyse_type_expression e =
                                         (* Vérification du bon typage des paramètres *)
                                         if (tpara = nlt) then ((AppelFonction (ia, nle)), tr)
                                         else raise (TypesParametresInattendus (nlt,tpara))
-  | AstTds.Ident ia -> ((Ident ia), get_type ia)
   | AstTds.Booleen n -> (Booleen n, Bool)
   | AstTds.Entier n -> (Entier n, Int)
 
@@ -78,9 +91,15 @@ let rec analyse_type_expression e =
                                         | AstSyntax.Equ, (a,Bool), (c,Bool) -> (Binaire(EquBool, a, c), Bool)
                                         | AstSyntax.Plus, (_,a), (_,b)-> raise (TypeBinaireInattendu (Plus,a, b))
                                         | AstSyntax.Mult, (_,a), (_,b)-> raise (TypeBinaireInattendu (Mult,a, b))
-                                        | AstSyntax.Equ, (_,a), (_,b)-> raise (TypeBinaireInattendu (Equ,a,b))
-                                    
+                                        | AstSyntax.Equ, (_,a), (_,b)-> raise (TypeBinaireInattendu (Equ,a,b))                                    
                                       end
+
+  (* ajout pour les pointeurs *)
+  | AstTds.Null -> (Null, (Pointeur Undefined))
+  | AstTds.New t -> (New(t), t)
+  | AstTds.Affectable a -> let s,t = (analyse_type_affectable a false) in 
+                           (Affectable s, t)
+  | AstTds.Adresse ia -> ((Adresse ia), (get_type ia))
 
 
   
@@ -97,10 +116,10 @@ let rec analyse_type_instruction tf i =
       let (ne, te) = analyse_type_expression e in
       if (t = te) then Declaration (ia, ne)
       else raise (TypeInattendu (te, t))
-  | AstTds.Affectation (n,e) ->
-      let t = (get_type n) in
+  | AstTds.Affectation (a,e) ->
+      let s , t = (analyse_type_affectable a true) in
       let (ne,te) = analyse_type_expression e in
-      if (t = te) then Affectation (n, ne)
+      if t = te then Affectation (s, ne)
       else raise (TypeInattendu (te, t))
 
   (* Résolution de la surcharge sur l'affichage *)
@@ -172,4 +191,3 @@ let analyser (AstTds.Programme (lf,b)) =
   Programme (nlet, nb)
 
 end
-*)
