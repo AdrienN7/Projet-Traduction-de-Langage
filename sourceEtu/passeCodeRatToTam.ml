@@ -32,17 +32,22 @@ struct
     | _ -> raise (InfoInattendu "Infovar2")
 
 
-let rec analyser_tam_affectable a iOUe =
+let rec analyser_tam_affectable a iOUe pointeur =
   match a with
-    | AstType.Deref ia -> ""
+    | AstType.Deref a1 -> (analyser_tam_affectable a1 iOUe true)
     | AstType.Ident ia -> match (info_ast_to_info ia) with
-                          | InfoVar (_,t,_,_) -> let (dep,reg) = (get_dep_reg ia) in
-                                          if (iOUe = true) then
+                          | InfoVar (_,t,dep,reg) -> 
+
+                                          if (iOUe && (not pointeur)) then
                                             "LOAD ("^(string_of_int (getTaille (get_type ia)))^") "
-                                            ^(string_of_int dep)^"["^reg^"]"
-                                            else  
+                                            ^(string_of_int dep)^"["^reg^"]\n"
+                                            else if ((not iOUe) && (not pointeur)) then
                                             "STORE ("^(string_of_int (getTaille t))^") "^(string_of_int dep)^"["^reg^"]\n"
-                          | InfoConst _ -> ""
+                                            else if (iOUe && pointeur) then "LOADI ("^(string_of_int (getTaille (get_type ia)))^")\n"
+                                            else "LOAD ("^(string_of_int (getTaille (get_type ia)))^") "
+                                            ^(string_of_int dep)^"["^reg^"]\n"
+                                            ^"STOREI ("^string_of_int(getTaille t)^")\n" (*faux pour le type RAT *)
+                          | InfoConst (t,nb) -> "LOADL "^(string_of_int nb)^"\n"
                           | InfoFun _ -> ""
 
 
@@ -77,10 +82,12 @@ and analyser_tam_expression e =
                            ^(analyser_tam_expression e2)^"\n"
                            ^typa^"\n"
       (* ajout pour les pointeurs *)
-  | Null -> ""
-  | New t -> ""
-  | Affectable (a,t) -> (analyser_tam_affectable a true)
-  | Adresse ia -> ""
+  | Null -> "0 \n"
+  | New t -> "LOADL "^(string_of_int (getTaille t))^"\n" 
+             ^"SUBR MAlloc \n"
+  | Affectable (a,t) -> (analyser_tam_affectable a true false)
+  | Adresse ia -> let (dep,reg) = (get_dep_reg ia) in
+                  "LOADA "^(string_of_int dep)^"["^reg^"]\n"
 
                        
 
@@ -93,7 +100,7 @@ let rec analyse_tam_instruction i ttr tparam =
 ^"STORE ("^(string_of_int taille)^") "^(string_of_int dep)^"["^reg^"]\n"
 
 
-  | Affectation (a, e) -> (analyser_tam_expression e)^"\n"^(analyser_tam_affectable a false)
+  | Affectation (a, e) -> (analyser_tam_expression e)^"\n"^(analyser_tam_affectable a false false)
   (*let (dep,reg) = (get_dep_reg n) in
                           (analyser_tam_expression e)^"\n"^"STORE ("^(string_of_int (getTaille (get_type n)))^") "^(string_of_int dep)^"["^reg^"]\n"
 *)
