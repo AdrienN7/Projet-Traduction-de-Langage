@@ -41,7 +41,7 @@ struct
                   match (info_ast_to_info ia) with
                   | InfoConst (n,_) -> if modif then raise (MauvaiseUtilisationIdentifiant n)
                                         else (Ident(ia), Int)
-                  | InfoVar _ -> (Ident(ia), get_type ia)
+                  | InfoVar _ -> (Ident(ia), (get_type ia))
                   | InfoFun (n, _, _) -> raise (MauvaiseUtilisationIdentifiant n)
                   end
 
