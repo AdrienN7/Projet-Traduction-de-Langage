@@ -1,4 +1,4 @@
-(* Module de la passe de gestion du typage *)
+(*(* Module de la passe de gestion du typage *)
 module PasseCodeRatToTam : Passe.Passe with type t1 = Ast.AstPlacement.programme and type t2 = string =
 struct
 
@@ -20,14 +20,9 @@ struct
     | InfoVar (_,t,_,_) -> t
     | _ -> raise (InfoInattendu "Infovar")
 
-  let get_taille t =
-    match t with
-    | Rat -> 2
-    | _ -> 1
-    
   let taille_variables i = 
     match i with
-    | AstType.Declaration (n, _) -> (get_taille (get_type n))
+    | AstType.Declaration (n, _) -> (getTaille (get_type n))
     | _ -> 0
 
   
@@ -46,7 +41,7 @@ let rec analyser_tam_expression e =
                                             (List.fold_right (fun x y -> (analyser_tam_expression x)^"\n"^y) b "")
                                   ^"CALL (SB) "^nom^"\n"
   | Ident (id_info) -> let (dep,reg) = (get_dep_reg id_info) in
-                       "LOAD ("^(string_of_int (get_taille (get_type id_info)))^") "
+                       "LOAD ("^(string_of_int (getTaille (get_type id_info)))^") "
                        ^(string_of_int dep)^"["^reg^"]"
   | Booleen (bool) -> if bool then "LOADL 1\n" else "LOADL 0\n"
   | Entier (ent) -> "LOADL "^(string_of_int ent)^"\n"
@@ -72,14 +67,14 @@ let rec analyser_tam_expression e =
 
 let rec analyse_tam_instruction i ttr tparam =
   match i with
-  | AstType.Declaration (n, e) -> let taille = (get_taille (get_type n)) in
+  | AstType.Declaration (n, e) -> let taille = (getTaille (get_type n)) in
                           let (dep,reg) = (get_dep_reg n) in
 "PUSH "^(string_of_int taille)^"\n"
 ^(analyser_tam_expression e)
 ^"STORE ("^(string_of_int taille)^") "^(string_of_int dep)^"["^reg^"]\n"
 
   | Affectation (n, e) -> let (dep,reg) = (get_dep_reg n) in
-                          (analyser_tam_expression e)^"\n"^"STORE ("^(string_of_int (get_taille (get_type n)))^") "^(string_of_int dep)^"["^reg^"]\n"
+                          (analyser_tam_expression e)^"\n"^"STORE ("^(string_of_int (getTaille (get_type n)))^") "^(string_of_int dep)^"["^reg^"]\n"
   | AffichageInt e -> (analyser_tam_expression e)^"\n"^"SUBR IOut\n"
   | AffichageRat e -> (analyser_tam_expression e)^"\n"^"CALL (SB) ROut\n"
   | AffichageBool e -> (analyser_tam_expression e)^"\n"^"SUBR Bout\n"
@@ -121,9 +116,9 @@ type AstTds.fonction en une fonction de type AstType.fonction *)
 (* Erreur si mauvaise utilisation des types *)
 let analyser_tam_fonction (Fonction(ia,_,b))  = 
   match (info_ast_to_info ia) with
-  | InfoFun (nf, tf, lpf) -> let tparams = (List.fold_right (fun x y -> (get_taille x) + y) lpf 0) in
+  | InfoFun (nf, tf, lpf) -> let tparams = (List.fold_right (fun x y -> (getTaille x) + y) lpf 0) in
                             nf^"\n"
-                            ^(analyser_tam_bloc b (get_taille tf) tparams)^"\n"
+                            ^(analyser_tam_bloc b (getTaille tf) tparams)^"\n"
                             ^"HALT\n"
   | _ -> raise (InfoInattendu "InfoFun")
 
@@ -136,3 +131,4 @@ let analyser (Programme (lf,b)) =
 "HALT\n"
 
 end
+*)
