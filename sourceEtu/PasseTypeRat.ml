@@ -114,24 +114,23 @@ let rec analyse_type_instruction tf i =
   | AstTds.Declaration (t, ia, e) ->
       modifier_type_info t ia;
       let (ne, te) = analyse_type_expression e in
-      if (t = te) then Declaration (ia, ne)
+      if (est_compatible t te) then Declaration (ia, ne)
       else raise (TypeInattendu (te, t))
   | AstTds.Affectation (a,e) ->
       let s , t = (analyse_type_affectable a true) in
       let (ne,te) = analyse_type_expression e in
-      if t = te then Affectation (s, ne)
+      if (est_compatible t te) then Affectation (s, ne)
       else raise (TypeInattendu (te, t))
 
   (* Résolution de la surcharge sur l'affichage *)
   (* Erreur si types indéfines *)
   | AstTds.Affichage e -> 
       let (ne,te) = analyse_type_expression e in
-        begin match te with
-        | Int -> AffichageInt ne
-        | Rat -> AffichageRat ne
-        | Bool -> AffichageBool ne
-        | _ -> raise (TypeInattendu (te,Undefined ))
-        end
+        if (est_compatible te Int) then AffichageInt ne
+        else if (est_compatible te Rat) then AffichageRat ne
+        else if (est_compatible te Bool) then AffichageBool ne
+        else raise (TypeInattendu (te,Undefined))
+
   | AstTds.Conditionnelle (c,bt,be) -> 
       let (ne,te) = analyse_type_expression c in
       if (te != Bool) then raise (TypeInattendu (te, Bool))
@@ -147,7 +146,7 @@ let rec analyse_type_instruction tf i =
       let (ne, te) = analyse_type_expression e in
       begin match tf with
       | None -> raise RetourDansMain
-      | Some t -> if (t=te) then Retour ne
+      | Some t -> if (est_compatible t te) then Retour ne
                   else raise (TypeInattendu (te, t))
       end
   | AstTds.Empty -> Empty

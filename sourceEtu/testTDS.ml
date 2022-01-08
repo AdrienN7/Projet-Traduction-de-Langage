@@ -356,10 +356,7 @@ let%test_unit "code_complique" =
   let _ = compiler   "../../fichiersRat/src-rat-tam-test/complique.rat" in ()
 
 let%test_unit "testpointeurs" = 
-  try 
-    let _ = compiler "../../fichiersRat/testprojet/testpointeurs.rat" 
-    in raise ErreurNonDetectee
-  with
-  | DoubleDeclaration("x") -> ()
+  let _ = compiler "../../fichiersRat/testprojet/testpointeurs.rat" in ()
+
 
 
