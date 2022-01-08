@@ -2,6 +2,6 @@ main{
 int * px = (new int);
 int x = 3;
 px = &x;
-int y = (*px)
+int y = (*px);
 print y;
 }
