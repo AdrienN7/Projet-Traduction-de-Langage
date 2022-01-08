@@ -98,7 +98,7 @@ let rec analyse_type_expression e =
   | AstTds.Null -> (Null, (Pointeur Undefined))
   | AstTds.New t -> (New(t), t)
   | AstTds.Affectable a -> let s,t = (analyse_type_affectable a false) in 
-                           (Affectable s, t)
+                           (Affectable (s,2022), t)
   | AstTds.Adresse ia -> ((Adresse ia), (get_type ia))
 
 

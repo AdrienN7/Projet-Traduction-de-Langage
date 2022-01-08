@@ -157,7 +157,7 @@ type expression =
   | Binaire of binaire * expression * expression
   (**** ajout pour les pointeurs ****)
   | Null
-  | Affectable of affectable
+  | Affectable of affectable * int
   | Adresse of Tds.info_ast
   | New of typ
 
