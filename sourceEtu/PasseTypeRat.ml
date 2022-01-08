@@ -36,14 +36,14 @@ struct
   let rec analyse_type_affectable a modif=
     match a with
     | AstTds.Deref a1 -> analyse_type_affectable a1 modif
-    | AstTds.Ident ia -> begin  
+    | AstTds.Ident ia -> 
+            begin  
                   match (info_ast_to_info ia) with
                   | InfoConst (n,_) -> if modif then raise (MauvaiseUtilisationIdentifiant n)
                                         else (Ident(ia), Int)
                   | InfoVar _ -> (Ident(ia), get_type ia)
                   | InfoFun (n, _, _) -> raise (MauvaiseUtilisationIdentifiant n)
                   end
-    (Ident ia, get_type ia)
 
 
 (* analyse_type_expression : AstTds.expression -> AstType.expression * typ *)
