@@ -201,6 +201,8 @@ end
 module AstPlacement =
 struct
 
+type affectable = AstType.affectable
+
 (* Expressions existantes dans notre langage *)
 (* = expression de AstType  *)
 type expression = AstType.expression
