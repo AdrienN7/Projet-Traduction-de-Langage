@@ -7,7 +7,7 @@ exception ErreurNonDetectee
 (* Sans fonction                  *)
 (* ------------------------------ *)
 
-
+(*
 let%test_unit "testDeclaration1"= 
   let _ = compiler "../../fichiersRat/src-rat-type-test/testDeclaration1.rat" in ()
 
@@ -560,3 +560,4 @@ let%test_unit "code_testfuns" =
 let _ = compiler   "../../fichiersRat/src-rat-tam-test/testfuns.rat" in ()
 
 
+*)

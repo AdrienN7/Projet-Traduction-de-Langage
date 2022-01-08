@@ -1,4 +1,4 @@
-(* Module de la passe de gestion du typage *)
+(*(* Module de la passe de gestion du typage *)
 module PasseTypeRat : Passe.Passe with type t1 = Ast.AstTds.programme and type t2 = Ast.AstType.programme =
 struct
 
@@ -172,3 +172,4 @@ let analyser (AstTds.Programme (lf,b)) =
   Programme (nlet, nb)
 
 end
+*)
