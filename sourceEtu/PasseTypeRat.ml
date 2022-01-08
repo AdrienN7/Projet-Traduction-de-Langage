@@ -126,12 +126,11 @@ let rec analyse_type_instruction tf i =
   (* Erreur si types indéfines *)
   | AstTds.Affichage e -> 
       let (ne,te) = analyse_type_expression e in
-        begin match te with
-        | Int -> AffichageInt ne
-        | Rat -> AffichageRat ne
-        | Bool -> AffichageBool ne
-        | _ -> raise (TypeInattendu (te,Undefined ))
-        end
+        if (est_compatible te Int) then AffichageInt ne
+        else if (est_compatible te Rat) then AffichageRat ne
+        else if (est_compatible te Bool) then AffichageBool ne
+        else raise (TypeInattendu (te,Undefined))
+
   | AstTds.Conditionnelle (c,bt,be) -> 
       let (ne,te) = analyse_type_expression c in
       if (te != Bool) then raise (TypeInattendu (te, Bool))

@@ -59,7 +59,7 @@ let rec analyse_tds_expression tds e =
       | Some ia -> 
         begin  
           match (info_ast_to_info ia) with
-          | InfoConst (_,m) -> Entier(m)
+          | InfoVar _ -> (Adresse ia)
           | _ -> raise (MauvaiseUtilisationIdentifiant n)
         end
 
