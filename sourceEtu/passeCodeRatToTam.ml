@@ -1,4 +1,4 @@
-(*(* Module de la passe de gestion du typage *)
+(* Module de la passe de gestion du typage *)
 module PasseCodeRatToTam : Passe.Passe with type t1 = Ast.AstPlacement.programme and type t2 = string =
 struct
 
@@ -18,7 +18,7 @@ struct
   let get_type ia =  
     match (info_ast_to_info ia) with
     | InfoVar (_,t,_,_) -> t
-    | _ -> raise (InfoInattendu "Infovar")
+    | _ -> raise (InfoInattendu "Infovar1")
 
   let taille_variables i = 
     match i with
@@ -29,20 +29,30 @@ struct
   let get_dep_reg ia =
     match (info_ast_to_info ia) with
     | InfoVar (_,_,dep,reg) -> (dep,reg)
-    | _ -> raise (InfoInattendu "Infovar")
+    | _ -> raise (InfoInattendu "Infovar2")
+
+
+let analyser_tam_affectable a =
+  match a with
+    | AstType.Deref a -> ""
+    | AstType.Ident ia -> match (info_ast_to_info ia) with
+                          | InfoVar _ -> let (dep,reg) = (get_dep_reg ia) in
+                                            "LOAD ("^(string_of_int (getTaille (get_type ia)))^") "
+                                            ^(string_of_int dep)^"["^reg^"]"
+                          | InfoConst _ -> ""
+                          | InfoFun _ -> ""
+
+
 
 let rec analyser_tam_expression e =
   match e with
   | AstType.AppelFonction (n,b) -> let nom = begin 
                                             match info_ast_to_info n with
                                             | InfoFun(nf, _, _) -> nf
-                                            | _ -> raise (InfoInattendu "infoVar")
+                                            | _ -> raise (InfoInattendu "infoVar3")
                                             end in
                                             (List.fold_right (fun x y -> (analyser_tam_expression x)^"\n"^y) b "")
                                   ^"CALL (SB) "^nom^"\n"
-  | Ident (id_info) -> let (dep,reg) = (get_dep_reg id_info) in
-                       "LOAD ("^(string_of_int (getTaille (get_type id_info)))^") "
-                       ^(string_of_int dep)^"["^reg^"]"
   | Booleen (bool) -> if bool then "LOADL 1\n" else "LOADL 0\n"
   | Entier (ent) -> "LOADL "^(string_of_int ent)^"\n"
   | Unaire (u,exp) -> let typa = begin match u with
@@ -64,6 +74,13 @@ let rec analyser_tam_expression e =
                           (analyser_tam_expression e1)^"\n"
                            ^(analyser_tam_expression e2)^"\n"
                            ^typa^"\n"
+      (* ajout pour les pointeurs *)
+  | Null -> ""
+  | New t -> ""
+  | Affectable (a,t) -> (analyser_tam_affectable a)
+  | Adresse ia -> ""
+
+                       
 
 let rec analyse_tam_instruction i ttr tparam =
   match i with
@@ -73,8 +90,12 @@ let rec analyse_tam_instruction i ttr tparam =
 ^(analyser_tam_expression e)
 ^"STORE ("^(string_of_int taille)^") "^(string_of_int dep)^"["^reg^"]\n"
 
-  | Affectation (n, e) -> let (dep,reg) = (get_dep_reg n) in
+
+  | Affectation (a, e) -> ""
+  (*let (dep,reg) = (get_dep_reg n) in
                           (analyser_tam_expression e)^"\n"^"STORE ("^(string_of_int (getTaille (get_type n)))^") "^(string_of_int dep)^"["^reg^"]\n"
+*)
+
   | AffichageInt e -> (analyser_tam_expression e)^"\n"^"SUBR IOut\n"
   | AffichageRat e -> (analyser_tam_expression e)^"\n"^"CALL (SB) ROut\n"
   | AffichageBool e -> (analyser_tam_expression e)^"\n"^"SUBR Bout\n"
@@ -131,4 +152,3 @@ let analyser (Programme (lf,b)) =
 "HALT\n"
 
 end
-*)
