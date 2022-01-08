@@ -32,19 +32,21 @@ struct
     | _ -> raise (InfoInattendu "Infovar2")
 
 
-let analyser_tam_affectable a =
+let rec analyser_tam_affectable a iOUe =
   match a with
-    | AstType.Deref a -> ""
+    | AstType.Deref ia -> ""
     | AstType.Ident ia -> match (info_ast_to_info ia) with
-                          | InfoVar _ -> let (dep,reg) = (get_dep_reg ia) in
+                          | InfoVar (_,t,_,_) -> let (dep,reg) = (get_dep_reg ia) in
+                                          if (iOUe = true) then
                                             "LOAD ("^(string_of_int (getTaille (get_type ia)))^") "
                                             ^(string_of_int dep)^"["^reg^"]"
+                                            else  
+                                            "STORE ("^(string_of_int (getTaille t))^") "^(string_of_int dep)^"["^reg^"]\n"
                           | InfoConst _ -> ""
                           | InfoFun _ -> ""
 
 
-
-let rec analyser_tam_expression e =
+and analyser_tam_expression e =
   match e with
   | AstType.AppelFonction (n,b) -> let nom = begin 
                                             match info_ast_to_info n with
@@ -77,7 +79,7 @@ let rec analyser_tam_expression e =
       (* ajout pour les pointeurs *)
   | Null -> ""
   | New t -> ""
-  | Affectable (a,t) -> (analyser_tam_affectable a)
+  | Affectable (a,t) -> (analyser_tam_affectable a true)
   | Adresse ia -> ""
 
                        
@@ -91,7 +93,7 @@ let rec analyse_tam_instruction i ttr tparam =
 ^"STORE ("^(string_of_int taille)^") "^(string_of_int dep)^"["^reg^"]\n"
 
 
-  | Affectation (a, e) -> ""
+  | Affectation (a, e) -> (analyser_tam_expression e)^"\n"^(analyser_tam_affectable a false)
   (*let (dep,reg) = (get_dep_reg n) in
                           (analyser_tam_expression e)^"\n"^"STORE ("^(string_of_int (getTaille (get_type n)))^") "^(string_of_int dep)^"["^reg^"]\n"
 *)
