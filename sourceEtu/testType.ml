@@ -1,4 +1,4 @@
-open Compilateur
+(*open Compilateur
 open Exceptions
 
 exception ErreurNonDetectee
@@ -7,7 +7,7 @@ exception ErreurNonDetectee
 (* Sans fonction                  *)
 (* ------------------------------ *)
 
-(*
+
 let%test_unit "testDeclaration1"= 
   let _ = compiler "../../fichiersRat/src-rat-type-test/testDeclaration1.rat" in ()
 
