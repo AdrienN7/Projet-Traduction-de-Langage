@@ -76,7 +76,7 @@ is :
 
 i :
 | t=typ n=ID EQUAL e1=e PV          {Declaration (t,n,e1)}
-| a1 = a EQUAL e1=e PV                {Affectation (a1,e1)}
+| a1 = a EQUAL e1=e PV              {Affectation (a1,e1)}
 | CONST n=ID EQUAL e=ENTIER PV      {Constante (n,e)}
 | PRINT e1=e PV                     {Affichage (e1)}
 | IF exp=e li1=bloc ELSE li2=bloc   {Conditionnelle (exp,li1,li2)}
@@ -85,7 +85,7 @@ i :
 
 a : (*implentation de l'affectable*)
 | n=ID       {Ident (n)} 
-| PO MULT a1=a  {Deref (a1)} 
+| PO MULT a1=a PF {Deref (a1)} 
 
 dp :
 |                         {[]}
@@ -112,7 +112,7 @@ e :
 | PO e1=e EQUAL e2=e PF   {Binaire (Equ,e1,e2)}
 | PO e1=e INF e2=e PF     {Binaire (Inf,e1,e2)}
 | PO exp=e PF             {exp}
-| a1=a                    {Affectable (a1)}  (* ajout des différentes expression pour le pointeur*)
+| a1=a                   {Affectable (a1)}  (* ajout des différentes expression pour le pointeur*)
 | NULL                    {Null}  
 | PO NEW t=typ PF         {New (t)}    
 | ET n=ID                 {Adresse (n)} 
