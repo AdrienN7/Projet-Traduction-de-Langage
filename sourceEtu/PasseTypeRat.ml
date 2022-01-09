@@ -35,7 +35,8 @@ struct
 
   let rec analyse_type_affectable a modif=
     match a with
-    | AstTds.Deref a1 -> analyse_type_affectable a1 modif
+    | AstTds.Deref a1 -> let ap,tp = (analyse_type_affectable a1 modif) in
+                          (Deref(ap), Pointeur tp)
     | AstTds.Ident ia -> 
             begin  
                   match (info_ast_to_info ia) with

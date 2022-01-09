@@ -35,20 +35,28 @@ struct
 let rec analyser_tam_affectable a iOUe pointeur =
   match a with
     | AstType.Deref a1 -> (analyser_tam_affectable a1 iOUe true)
-    | AstType.Ident ia -> match (info_ast_to_info ia) with
+    | AstType.Ident ia -> begin match (info_ast_to_info ia) with
                           | InfoVar (_,t,dep,reg) -> 
-
+                              
                                           if (iOUe && (not pointeur)) then
                                             "LOAD ("^(string_of_int (getTaille (get_type ia)))^") "
                                             ^(string_of_int dep)^"["^reg^"]\n"
-                                            else if ((not iOUe) && (not pointeur)) then
+                                          
+                                          else if ((not iOUe) && (not pointeur)) then
                                             "STORE ("^(string_of_int (getTaille t))^") "^(string_of_int dep)^"["^reg^"]\n"
-                                            else if (iOUe && pointeur) then "LOADI ("^(string_of_int (getTaille (get_type ia)))^")\n"
-                                            else "LOAD ("^(string_of_int (getTaille (get_type ia)))^") "
+                                          
+                                          else if (iOUe && pointeur) then 
+                                        
+                                            "LOADI ("^(string_of_int (getTaille (get_type ia)))^")\n"
+                                          
+                                          else 
+                                            "LOAD ("^(string_of_int (getTaille (get_type ia)))^") "
                                             ^(string_of_int dep)^"["^reg^"]\n"
                                             ^"STOREI ("^string_of_int(getTaille t)^")\n" (*faux pour le type RAT *)
+
                           | InfoConst (t,nb) -> "LOADL "^(string_of_int nb)^"\n"
                           | InfoFun _ -> ""
+                          end
 
 
 and analyser_tam_expression e =
