@@ -12,50 +12,63 @@ struct
   type t2 = Ast.AstType.programme
 
 
-  (*list des types de param*)
-  (*paramètre ia : info ast*) 
+  (* get_type_param : info_ast -> typ                  *)
+  (* paramètre ia : info_ast de la fonction            *)
+  (* récupère les types des parametre de la fonction   *) 
+  (* Erreur si Info inattendu                          *)
   let get_type_param ia =  
       match info_ast_to_info ia with
       | InfoFun (_, _, tl) -> tl
       | _ -> raise (InfoInattendu "InfoFun")
       
-  (*le type que la fonction retourne*)
-  (*paramètre ia : info ast*) 
+  (* get_type_return : info_ast -> typ                 *)
+  (* paramètre ia : info_ast de la fonction            *)
+  (* récupère le type return de la fonction            *) 
+  (* Erreur si Info inattendu                          *) 
   let get_type_return ia =  
         match info_ast_to_info ia with
         | InfoFun (_,t,_) -> t
         | _ -> raise (InfoInattendu "InfoFun")
-  (*retourne le type*)
-  (*paramètre ia : info ast*) 
+
+  (* get_type : info_ast -> typ                        *)
+  (* paramètre ia : info_ast de la variable            *)
+  (* récupère le type de la variable                   *) 
+  (* Erreur si Info inattendu                          *)
   let get_type ia =  
         match info_ast_to_info ia with
         | InfoVar (_,t,_,_) -> t
         | _ -> raise (InfoInattendu "Infovar")
 
-
-  let rec analyse_type_affectable a modif=
+  (* analyse_type_affectable : AstTds.affectable-> AstType.affectable            *)
+  (* Paramètre a : l'affectable à analyser                                       *)
+  (* Vérifie la bonne utilisation des type et tranforme l'AstTds.affectable      *)
+  (* en une affectable de type AstType.affectable et l'affectable                *)
+  (* Erreur si mauvaise utilisation des types                                     *)
+  let rec analyse_type_affectable a =
     match a with
-    | AstTds.Deref a1 -> let ap,tp = (analyse_type_affectable a1 modif) in
+    (*Deref: renvoie la structure du deref d'astType.affectable avec l'afectable pointé et le type du pointeur *)
+    | AstTds.Deref a1 -> let ap,tp = (analyse_type_affectable a1) in
                           (Deref(ap), Pointeur tp)
+    (* Ident: renvoie la structure d'ident d'astType.affectable en fonction du type d'info *)
     | AstTds.Ident ia -> 
             begin  
                   match (info_ast_to_info ia) with
-                  | InfoConst (n,_) -> if modif then raise (MauvaiseUtilisationIdentifiant n)
-                                        else (Ident(ia), Int)
+                  | InfoConst _ ->  (Ident(ia), Int)
                   | InfoVar _ -> (Ident(ia), (get_type ia))
+                   (*le cas si dessous ne doit jamais arriver *)
                   | InfoFun (n, _, _) -> raise (MauvaiseUtilisationIdentifiant n)
                   end
 
 
-(* analyse_type_expression : AstTds.expression -> AstType.expression * typ *)
+
+(* analyse_type_expression : AstTds.expression -> AstType.expression * typ  *)
 (* Paramètre e : l'expression à analyser *)
 (* Vérifie la bonne utilisation des type et tranforme l'AstTds.expression
 en une expression de type AstType.expression et renvoie le type de l'expression *)
 (* Erreur si mauvaise utilisation des types *)
-
-
 let rec analyse_type_expression e =
   match e with
+  (* Appel Fonction : vérifie le bon typage des parametre et fait l'analyse des expression dansq la fonction *)
   | AstTds.AppelFonction (ia, le) -> let nlet = List.map analyse_type_expression le in
                                      let tr = get_type_return ia in
                                      let tpara = get_type_param ia in
@@ -64,10 +77,11 @@ let rec analyse_type_expression e =
                                         (* Vérification du bon typage des paramètres *)
                                         if (tpara = nlt) then ((AppelFonction (ia, nle)), tr)
                                         else raise (TypesParametresInattendus (nlt,tpara))
+  
   | AstTds.Booleen n -> (Booleen n, Bool)
   | AstTds.Entier n -> (Entier n, Int)
 
-   (* Résolution de la surcharge sur les opérateurs unaires *)
+  (* Résolution de la surcharge sur les opérateurs unaires *)
   (* Erreur si type et opération incomaptibles *)
   | AstTds.Unaire (u, e1) -> let (ne1, te1) = analyse_type_expression e1 in
                               begin match u with
@@ -96,9 +110,11 @@ let rec analyse_type_expression e =
                                       end
 
   (* ajout pour les pointeurs *)
+
+  
   | AstTds.Null -> (Null, (Pointeur Undefined))
   | AstTds.New t -> (New(t), t)
-  | AstTds.Affectable a -> let s,t = (analyse_type_affectable a false) in 
+  | AstTds.Affectable a -> let s,t = (analyse_type_affectable a) in 
                            (Affectable (s,2022), t)
   | AstTds.Adresse ia -> ((Adresse ia), (get_type ia))
 
@@ -118,7 +134,7 @@ let rec analyse_type_instruction tf i =
       if (est_compatible t te) then Declaration (ia, ne)
       else raise (TypeInattendu (te, t))
   | AstTds.Affectation (a,e) ->
-      let s , t = (analyse_type_affectable a true) in
+      let s , t = (analyse_type_affectable a) in
       let (ne,te) = analyse_type_expression e in
       if (est_compatible t te) then Affectation (s, ne)
       else raise (TypeInattendu (te, t))

@@ -1,0 +1,9 @@
+main {
+    rat * x = (new rat);
+    (*x) = [4/3];
+    rat z = [18/7];
+    rat * y = &z;
+    (*y) = (*x);
+
+    print (*y);
+}
