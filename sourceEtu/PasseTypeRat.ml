@@ -167,6 +167,16 @@ let rec analyse_type_instruction tf i =
                   else raise (TypeInattendu (te, t))
       end
   | AstTds.Empty -> Empty
+  (* ajout pour l'operateur d'assignation *)
+  | AstTds.Addition (a1,e1) -> let (na,ta) = analyse_type_affectable a1 in
+                                  let (ne,te) = analyse_type_expression e1 in
+                                    if ((est_compatible ta te) && (est_compatible ta Int) ) then 
+                                      Affectation (na,(Binaire(PlusInt, Affectable (na,2022), ne)))
+                                    else if ((est_compatible ta te) && (est_compatible ta Rat)) then 
+                                      Affectation (na,(Binaire(PlusRat, Affectable (na,2022), ne)))
+                                    else raise (TypeInattendu(ta, te))
+                                      
+
       
 (* analyse_type_bloc : typ option -> AstTds.bloc -> AstType.bloc *)
 (* Paramètre tf : : le type retour attendu du bloc *)

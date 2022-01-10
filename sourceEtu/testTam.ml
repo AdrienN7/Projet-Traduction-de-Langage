@@ -117,3 +117,8 @@ let%expect_test "testpointeurs" =
 let%expect_test "exo2" = 
   runtam "../../fichiersRat/testprojet/exo2.rat";
   [%expect{| 4 |}]
+
+let%expect_test "testassignation" = 
+runtam   "../../fichiersRat/testprojet/testassignation.rat";
+  [%expect{| 7[37/40] |}]
+

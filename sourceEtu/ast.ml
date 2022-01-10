@@ -64,6 +64,8 @@ and instruction =
   | Retour of expression
   (**** ajout pour les pointeurs ****)
   | Affectation of affectable * expression
+  (* ajout pour l'operateur d'assignation *)
+  | Addition of affectable * expression
 
 
 
@@ -118,6 +120,8 @@ struct
     | Empty (* les nœuds ayant disparus: Const *)
     (**** modification pour les pointeurs ****)
     | Affectation of affectable * expression
+    (* ajout pour l'operateur d'assignation *)
+    | Addition of affectable * expression
 
 
   (* Structure des fonctions dans notre langage *)
@@ -176,6 +180,8 @@ type bloc = instruction list
   | Empty (* les nœuds ayant disparus: Const *)
   (**** modification pour les pointeurs ****)
   | Affectation of affectable * expression
+  (* ajout pour l'operateur d'assignation *)
+  | Addition of affectable * expression
 
 (* informations associées à l'identificateur (dont son nom), liste des paramètres, corps *)
 type fonction = Fonction of Tds.info_ast * Tds.info_ast list * bloc

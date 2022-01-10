@@ -1,4 +1,4 @@
-; fichiersRat/testprojet/testpointeurrat.rat
+; fichiersRat/testprojet/testassignation.rat
 JUMP main
 
 pgcd
@@ -72,35 +72,38 @@ RETURN (2) 4
 
 main
 PUSH 1
-LOADL 2
-SUBR MAlloc 
+LOADL 3
 STORE (1) 0[SB]
+LOAD (1) 0[SB]
+
 LOADL 4
 
-LOADL 3
+SUBR IAdd
 
-
-
+STORE (1) 0[SB]
 LOAD (1) 0[SB]
-STOREI (2)
-PUSH 2
-LOADL 18
 
-LOADL 7
+SUBR IOut
+PUSH 2
+LOADL 4
+
+LOADL 5
 
 
 STORE (2) 1[SB]
-PUSH 1
-LOADA 1[SB]
-STORE (1) 3[SB]
-LOAD (1) 0[SB]
-LOADI (2)
+LOAD (2) 1[SB]
 
-LOAD (1) 3[SB]
-STOREI (2)
-LOAD (1) 3[SB]
-LOADI (2)
+LOADL 1
+
+LOADL 8
+
+
+
+CALL (SB) RAdd
+
+STORE (2) 1[SB]
+LOAD (2) 1[SB]
 
 CALL (SB) ROut
-POP (0) 4
+POP (0) 3
 HALT

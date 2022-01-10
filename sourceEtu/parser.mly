@@ -82,6 +82,7 @@ i :
 | IF exp=e li1=bloc ELSE li2=bloc   {Conditionnelle (exp,li1,li2)}
 | WHILE exp=e li=bloc               {TantQue (exp,li)}
 | RETURN exp=e PV                   {Retour (exp)}
+| a1=a PLUS EQUAL e1=e PV           {Addition (a1,e1)} (*Ajout d'une instruction pour l'operateur d'assignation Addition*)
 
 a : (*implentation de l'affectable*)
 | n=ID       {Ident (n)} 

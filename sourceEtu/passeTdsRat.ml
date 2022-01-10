@@ -84,6 +84,8 @@ let rec analyse_tds_expression tds e =
   | AstSyntax.Unaire (u, e1) -> Unaire (u, (analyse_tds_expression tds e1))
   | AstSyntax.Binaire (b, e1, e2) -> Binaire (b, analyse_tds_expression tds e1, analyse_tds_expression tds e2)
 
+
+
   
 (* analyse_tds_instruction : AstSyntax.instruction -> tds -> AstTds.instruction *)
 (* Paramètre tds : la table des symboles courante *)
@@ -158,9 +160,19 @@ let rec analyse_tds_instruction tds i =
       let ne = analyse_tds_expression tds e in
       Retour (ne)
   | AstSyntax.Affectation (a,e) ->
+      (*Analyse de l'expression*)
       let ne = analyse_tds_expression tds e in
+      (*Analyse de l'affectable *)
       let na = analyse_tds_affectable tds true a in
       Affectation(na, ne)
+    
+    (* ajout pour l'operateur d'assignation *)
+  | AstSyntax.Addition (a1,e1) -> 
+      (*Analyse de l'expression*)
+      let ne = analyse_tds_expression tds e1 in
+      (*Analyse de l'affectable *)
+      let na = analyse_tds_affectable tds true a1 in
+      Addition(na, ne)
 
       
 (* analyse_tds_bloc : AstSyntax.bloc -> AstTds.bloc *)
