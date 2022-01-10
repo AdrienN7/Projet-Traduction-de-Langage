@@ -169,6 +169,8 @@ struct
                   ^"RETURN ("^(string_of_int ttr)^") "^(string_of_int tparam)^"\n"
     | Empty -> ""
 
+    | Addition (a,e) -> (analyser_tam_expression e)^"\n"^(analyser_tam_affectable a false false)
+
 
         
   (* analyse_tam_bloc : AstType.instruction list -> typ -> typ list -> string     *)
