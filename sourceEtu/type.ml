@@ -1,4 +1,4 @@
-type typ = Bool | Int | Rat | Undefined | Pointeur of typ
+type typ = Bool | Int | Rat | Undefined | Pointeur of typ | Tident of string
 
 (* ajout de la récursivité pour les pointeurs*)
 let rec string_of_type t = 
@@ -8,6 +8,7 @@ let rec string_of_type t =
   | Rat  ->  "Rat"
   | Undefined -> "Undefined"
   | Pointeur a -> "Pointeur of "^(string_of_type a)
+  | Tident n ->   "Tident of"^n 
 
 
 let rec est_compatible t1 t2 =

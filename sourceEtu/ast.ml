@@ -17,6 +17,11 @@ module AstSyntax =
 struct
 
 (***************)
+
+(* types nommes*)
+type nommes =
+  | None
+  | Typedefglobal of string * typ * nommes
 (* Affectables *)
 type affectable =
   | Deref of affectable
@@ -66,6 +71,8 @@ and instruction =
   | Affectation of affectable * expression
   (* ajout pour l'operateur d'assignation *)
   | Addition of affectable * expression
+  (*definition local d'un type nommé *)
+  | Typedeflocal of string * typ
 
 
 
@@ -75,7 +82,7 @@ type fonction = Fonction of typ * string * (typ * string) list * bloc
 
 (* Structure d'un programme Rat *)
 (* liste de fonction - programme principal *)
-type programme = Programme of fonction list * bloc
+type programme = Programme of nommes * fonction list * bloc
 
 end
 
@@ -85,6 +92,10 @@ end
 (* ********************************************* *)
 module AstTds =
 struct
+   (* types nommes*)
+  type nommes =
+  | None
+  | Typedefglobal of Tds.info_ast * typ * nommes
 
   (* ajout pour les pointeurs *)
   type affectable =
@@ -122,14 +133,17 @@ struct
     | Affectation of affectable * expression
     (* ajout pour l'operateur d'assignation *)
     | Addition of affectable * expression
+    (*definition local d'un type nommé *)
+    | Typedeflocal of Tds.info_ast * typ
+
 
 
   (* Structure des fonctions dans notre langage *)
   (* type de retour - informations associées à l'identificateur (dont son nom) - liste des paramètres (association type et information sur les paramètres) - corps de la fonction *)
-  type fonction = Fonction of typ * Tds.info_ast * (typ * Tds.info_ast ) list * bloc
+  type fonction = Fonction of  typ * Tds.info_ast * (typ * Tds.info_ast ) list * bloc
 
   (* Structure d'un programme dans notre langage *)
-  type programme = Programme of fonction list * bloc
+  type programme = Programme of nommes * fonction list * bloc
 
 end
 
@@ -139,6 +153,12 @@ end
 (* ******************************* *)
 module AstType =
 struct
+
+(* types nommes*)
+  type nommes =
+  | None
+  | Typedefglobal of Tds.info_ast * typ * nommes
+
 
 (* ajout pour les pointeurs *)
 type affectable =
@@ -182,12 +202,14 @@ type bloc = instruction list
   | Affectation of affectable * expression
   (* ajout pour l'operateur d'assignation *)
   | Addition of affectable * expression
+  | Typedeflocal of Tds.info_ast * typ
+
 
 (* informations associées à l'identificateur (dont son nom), liste des paramètres, corps *)
 type fonction = Fonction of Tds.info_ast * Tds.info_ast list * bloc
 
 (* Structure d'un programme dans notre langage *)
-type programme = Programme of fonction list * bloc
+type programme = Programme of nommes fonction list * bloc
 
 let taille_variables_declarees i =
   match i with

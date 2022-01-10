@@ -32,6 +32,7 @@
         "return",  RETURN;
         "new",     NEW;     (* ajout pour les pointeurs *)
         "null",    NULL     (* ajout pour les pointeurs *)
+        "typedef"   "TYPEDEF" (*ajout pour les types nommés)
       ];
     fun id ->
       match Hashtbl.find_opt kws id with
@@ -68,6 +69,10 @@ rule token = parse
 (* identifiants et mots-clefs *)
 | ['a'-'z'](['A'-'Z''a'-'z''0'-'9']|"-"|"_")* as n
                { ident n }
+
+(* identifiants des type nommé*)
+| ['A'-'Z'](['A'-'Z''a'-'z''0'-'9']|"-"|"_")* as tn 
+                { tident tn }
 
 (* fin de lecture *)
 | eof          { EOF }

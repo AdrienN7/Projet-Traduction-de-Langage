@@ -42,8 +42,13 @@ open Ast.AstSyntax
 %token NEW
 %token NULL
 
+(*ajout pour les types nommés*)
+%token TYPEDEF
+%token <string> TID
+
 (* Type de l'attribut synthétisé des non-terminaux *)
 %type <programme> prog
+%type <typedefinie> td
 %type <instruction list> bloc
 %type <fonction> fonc
 %type <instruction list> is
@@ -63,8 +68,12 @@ open Ast.AstSyntax
 main : lfi = prog EOF     {lfi}
 
 prog :
-| lf = fonc  lfi = prog   {let (Programme (lf1,li))=lfi in (Programme (lf::lf1,li))}
+| td1 = td  lf = fonc  lfi = prog   {let (td1,Programme (lf1,li))=lfi in (Programme (lf::lf1,li))}
 | ID li = bloc            {Programme ([],li)}
+
+td :
+|                         {[]}
+| TYPEDEF tn=TID EQUAL t=typ PV td1=td {Typedefglobal (tn,t,td1)}
 
 fonc : t=typ n=ID PO p=dp PF AO li=is AF {Fonction(t,n,p,li)}
 
@@ -83,6 +92,7 @@ i :
 | WHILE exp=e li=bloc               {TantQue (exp,li)}
 | RETURN exp=e PV                   {Retour (exp)}
 | a1=a PLUS EQUAL e1=e PV           {Addition (a1,e1)} (*Ajout d'une instruction pour l'operateur d'assignation Addition*)
+| TYPEDEF tn=TID EQUAL t=typ        {Typedeflocal (tn,t)} (* définition locale d'un type nommé *)
 
 a : (*implentation de l'affectable*)
 | n=ID       {Ident (n)} 
@@ -97,6 +107,7 @@ typ :
 | INT     {Int}
 | RAT     {Rat}
 | t=typ MULT {Pointeur (t)} (* Ajout du typ pointeurs*)
+| tn=TID   {Tident (tn)}        (*utilisation d'un type nommé*)
 
 
 e : 
