@@ -31,8 +31,8 @@
         "false",   FALSE;
         "return",  RETURN;
         "new",     NEW;     (* ajout pour les pointeurs *)
-        "null",    NULL     (* ajout pour les pointeurs *)
-        "typedef"   "TYPEDEF" (*ajout pour les types nommés)
+        "null",    NULL;     (* ajout pour les pointeurs *)
+        "typedef"   TYPEDEF (*ajout pour les types nommés)
       ];
     fun id ->
       match Hashtbl.find_opt kws id with

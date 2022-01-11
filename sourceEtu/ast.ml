@@ -21,7 +21,7 @@ struct
 (* types nommes*)
 type nommes =
   | None
-  | Typedefglobal of string * typ * nommes
+  | Typedefglobal of string * typ
 (* Affectables *)
 type affectable =
   | Deref of affectable
@@ -82,7 +82,7 @@ type fonction = Fonction of typ * string * (typ * string) list * bloc
 
 (* Structure d'un programme Rat *)
 (* liste de fonction - programme principal *)
-type programme = Programme of nommes * fonction list * bloc
+type programme = Programme of nommes list * fonction list * bloc
 
 end
 
@@ -95,7 +95,7 @@ struct
    (* types nommes*)
   type nommes =
   | None
-  | Typedefglobal of Tds.info_ast * typ * nommes
+  | Typedefglobal of Tds.info_ast * typ
 
   (* ajout pour les pointeurs *)
   type affectable =
@@ -143,7 +143,7 @@ struct
   type fonction = Fonction of  typ * Tds.info_ast * (typ * Tds.info_ast ) list * bloc
 
   (* Structure d'un programme dans notre langage *)
-  type programme = Programme of nommes * fonction list * bloc
+  type programme = Programme of nommes list * fonction list * bloc
 
 end
 
@@ -157,7 +157,7 @@ struct
 (* types nommes*)
   type nommes =
   | None
-  | Typedefglobal of Tds.info_ast * typ * nommes
+  | Typedefglobal of Tds.info_ast * typ
 
 
 (* ajout pour les pointeurs *)
@@ -209,7 +209,7 @@ type bloc = instruction list
 type fonction = Fonction of Tds.info_ast * Tds.info_ast list * bloc
 
 (* Structure d'un programme dans notre langage *)
-type programme = Programme of nommes fonction list * bloc
+type programme = Programme of nommes list * fonction list * bloc
 
 let taille_variables_declarees i =
   match i with

@@ -36,10 +36,18 @@ struct
   module A = AstSyntax
   open A
 
+  (* Conversion des affectables *)
   let rec string_of_affectable a =
     match a with
       | Deref a1 -> "* "^(string_of_affectable a1)^" "
       | Ident n -> n^" "
+
+  (* Conversion des types nommés*)
+  let  string_of_nomme nomm =
+    match nomm with
+    | None -> " "
+    | Typedefglobal (n,t) -> "Typedef "^n^" = "^(string_of_type t)^" "
+
   (* Conversion des opérateurs unaires *)
   let string_of_unaire op =
     match op with
@@ -93,7 +101,8 @@ struct
                                         ((List.fold_right (fun i tq -> (string_of_instruction i)^tq) li ""))^"\n"
 
   (* Conversion d'un programme Rat *)
-  let string_of_programme (Programme (fonctions, instruction)) =
+  let string_of_programme (Programme (nommes, fonctions, instruction)) =
+    (List.fold_right (fun n tq -> (string_of_nomme n)^tq) nommes "")^
     (List.fold_right (fun f tq -> (string_of_fonction f)^tq) fonctions "")^
     (List.fold_right (fun i tq -> (string_of_instruction i)^tq) instruction "")
 

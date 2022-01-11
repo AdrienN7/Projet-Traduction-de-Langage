@@ -1,5 +1,7 @@
 type typ = Bool | Int | Rat | Undefined | Pointeur of typ | Tident of string
 
+open Exceptions
+
 (* ajout de la récursivité pour les pointeurs*)
 let rec string_of_type t = 
   match t with
@@ -68,6 +70,7 @@ let getTaille t =
   | Rat -> 2
   | Undefined -> 0
   | Pointeur _ -> 1
+  | Tident _ -> failwith("Impossible") (* lors de la gestion de typage Tident est toujours remplacé *)
   
 let%test _ = getTaille Int = 1
 let%test _ = getTaille Bool = 1
