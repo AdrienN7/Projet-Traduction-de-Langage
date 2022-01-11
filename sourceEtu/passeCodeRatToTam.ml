@@ -88,7 +88,7 @@ struct
                                               (* stockage dans la case mémoire à l'adresse du pointeur *)
 
                             | InfoConst (_,nb) -> "LOADL "^(string_of_int nb)^"\n" (* si l'affectable est une constante alors forcément coté droit de l'affectation *)
-                            | InfoFun _ -> ""  (* cas impossible *)
+                            | _ -> ""  (* cas impossible *)
                             end
 
   (* analyse_tam_expression : AstType.expression -> string *)

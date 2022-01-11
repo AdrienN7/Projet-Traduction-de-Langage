@@ -11,7 +11,10 @@ struct
   type t1 = Ast.AstTds.programme
   type t2 = Ast.AstType.programme
 
+  
 
+
+  
   (* get_type_param : info_ast -> typ                  *)
   (* paramètre ia : info_ast de la fonction            *)
   (* récupère les types des parametre de la fonction   *) 
@@ -57,6 +60,7 @@ struct
                   | InfoVar _ -> (Ident(ia), (get_type ia))
                    (*le cas si dessous ne doit jamais arriver *)
                   | InfoFun (n, _, _) -> raise (MauvaiseUtilisationIdentifiant n)
+                  | InfoTyp (n,_) -> raise (MauvaiseUtilisationIdentifiant n)
                   end
 
 
@@ -118,21 +122,45 @@ let rec analyse_type_expression e =
                            (Affectable (s,2022), t)
   | AstTds.Adresse ia -> ((Adresse ia), (get_type ia))
 
+let rec ajouterListNomme ltn nt = 
+    match ltn with
+    | []   -> [nt]
+    | t::q -> if (t = nt) then nt::q else (ajouterListNomme q nt)
 
-  
+
+let rec changer_type tn ltn = 
+  match ltn with
+  | [] -> raise (Erreur_type_nomme)
+  | (n,t)::q -> if (n=tn) then t 
+                else (changer_type tn q)
+
 (* analyse_type_instruction : typ option -> AstTds.instruction -> AstTypeInstruction *)
 (* Paramètre tf : le type attendu de l'instruction *)
 (* Paramètre i : l'instruction à analyser *)
 (* Vérifie la bonne utilisation des types et tranforme l'instruction de type AstTds.instruction
 en une instruction de type AstType.instruction *)
 (* Erreur si mauvaise utilisation des types *)
-let rec analyse_type_instruction tf i =
+let rec analyse_type_instruction ltn tf i =
   match i with
   | AstTds.Declaration (t, ia, e) ->
-      modifier_type_info t ia;
-      let (ne, te) = analyse_type_expression e in
-      if (est_compatible t te) then Declaration (ia, ne)
-      else raise (TypeInattendu (te, t))
+      (*modifier le type ici *)
+      begin
+      match t with
+       | Tident n  ->
+        
+        let nt = changer_type n ltn in
+        modifier_type_info nt ia;
+        let (ne, te) = analyse_type_expression e in
+        if (est_compatible nt te) then Declaration (ia, ne)
+        else raise (TypeInattendu (te, nt))
+        
+      | _ ->
+        
+        modifier_type_info t ia;
+        let (ne, te) = analyse_type_expression e in
+        if (est_compatible t te) then Declaration (ia, ne)
+        else raise (TypeInattendu (te, t))
+      end
   | AstTds.Affectation (a,e) ->
       let s , t = (analyse_type_affectable a) in
       let (ne,te) = analyse_type_expression e in
@@ -151,13 +179,13 @@ let rec analyse_type_instruction tf i =
   | AstTds.Conditionnelle (c,bt,be) -> 
       let (ne,te) = analyse_type_expression c in
       if (te != Bool) then raise (TypeInattendu (te, Bool))
-      else let nbt = analyse_type_bloc tf bt in
-           let nbe = analyse_type_bloc tf be in
+      else let nbt = analyse_type_bloc tf bt ltn in
+           let nbe = analyse_type_bloc tf be ltn in
            Conditionnelle (ne, nbt, nbe)
   | AstTds.TantQue (c,b) -> 
       let (ne,te) = analyse_type_expression c in
       if (te != Bool) then raise (TypeInattendu (te, Bool))
-      else let nb = analyse_type_bloc tf b in
+      else let nb = analyse_type_bloc tf b ltn in
           TantQue (ne, nb)
   | AstTds.Retour (e) -> 
       let (ne, te) = analyse_type_expression e in
@@ -175,45 +203,76 @@ let rec analyse_type_instruction tf i =
                                     else if ((est_compatible ta te) && (est_compatible ta Rat)) then 
                                       Affectation (na,(Binaire(PlusRat, Affectable (na,2022), ne)))
                                     else raise (TypeInattendu(ta, te))
+  | AstTds.Typedeflocal (n,t) -> Typedeflocal (n,t)
+
+    
                                       
+
 
       
 (* analyse_type_bloc : typ option -> AstTds.bloc -> AstType.bloc *)
 (* Paramètre tf : : le type retour attendu du bloc *)
 (* Paramètre li : liste d'instructions à analyser *)
+(* Paramètre ltn : liste des type nommé défini à l'exterieur du bloc *)
 (* Vérifie la bonne utilisation des types et tranforme le bloc de type 
 AstTds.bloc en un bloc de type AstType.bloc *)
 (* Erreur si mauvaise utilisation des types *)
-and analyse_type_bloc tf li =
-  List.map (analyse_type_instruction tf) li
+and analyse_type_bloc tf li ltn =
+  match li with
+  | [] -> []
+  | i::q -> begin 
+                      let i1 = (analyse_type_instruction ltn tf i ) in 
+                      match i1 with
+                     | Typedeflocal (n,t) -> let newltn = ajouterListNomme ltn (n,t) in
+                                         (analyse_type_bloc tf q newltn)
+                     | _ -> i1::(analyse_type_bloc tf q ltn)
+                     end
 
 (* analyse_type_param : type * info_ast -> type * info_ast *)
 (* Paramètre : liste des paramètre de la fonction *)
 (* modifie l'ast avec les bon paramètres *)
-let  analyse_type_param  (typ,n) =
-  modifier_type_info typ n;
-  (typ,n)
+let  analyse_type_param ltn (typ,n) =
+  
+      match typ with
+       | Tident tn  -> let nt = changer_type tn ltn in
+                        modifier_type_info nt n;
+                        (nt,n)
+      | _ -> modifier_type_info typ n;
+            (typ,n)
+      
+
+  
 (* analyse_type_fonctionRetour : AstTds.fonction -> AstType.fonction *)
 (* Paramètre : l'AstTds.fonction à analyser *)
 (* Vérifie la bonne utilisation des type et tranforme la fonction de
 type AstTds.fonction en une fonction de type AstType.fonction *)
 (* Erreur si mauvaise utilisation des types *)
-let analyse_type_fonctionRetour (AstTds.Fonction(t,n,lp,li))  =
-  let tlp = List.map (analyse_type_param) lp in
+let analyse_type_fonctionRetour ltn (AstTds.Fonction(t,n,lp,li))  =
+  let tlp = List.map (analyse_type_param ltn) lp in
   let slp = List.map (fun (a,_) -> a) tlp in
   let sn = List.map (fun (_,b) -> b) tlp in
-  modifier_type_fonction_info t slp n;
-  let nli = analyse_type_bloc (Some t) li in
-  Fonction (n,sn,nli)
+  begin
+   match t with
+      | Tident tn  -> let nt = changer_type tn ltn in
+                        modifier_type_fonction_info nt slp n;
+                        let nli = analyse_type_bloc (Some nt) li ltn in
+                        Fonction (n,sn,nli)             
+      | _ -> modifier_type_fonction_info t slp n;
+            let nli = analyse_type_bloc (Some t) li ltn in
+            Fonction (n,sn,nli)
+  end
+
 
 (* analyser : AstTds.ast -> AstType.ast *)
 (* Paramètre : l'AstTds à analyser *)
 (* Vérifie la bonne utilisation des types et tranforme le programme
 de type AstTds.ast en un programme de type AstTds.ast *)
 (* Erreur si mauvaise utilisation des types *)
-let analyser (AstTds.Programme (lf,b)) =
-  let nlet = List.map analyse_type_fonctionRetour lf in
-  let nb = analyse_type_bloc None b in
+let analyser (AstTds.Programme (ln, lf,b)) =
+  (* liste assaciant le non au type *)
+  let ltn = (List.fold_right (fun  (AstTds.Typedefglobal (a,b)) y ->  (a,b)::y) ln []) in
+  let nlet = List.map (analyse_type_fonctionRetour ltn) lf  in
+  let nb = analyse_type_bloc None b ltn in
   Programme (nlet, nb)
 
 end

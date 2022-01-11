@@ -13,4 +13,6 @@ exception TypeBinaireInattendu of binaire * typ * typ (* les types sont les type
 exception InfoInattendu of string
 exception RetourDansMain
 
+exception Erreur_type_nomme
+
 

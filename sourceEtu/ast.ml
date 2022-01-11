@@ -19,9 +19,7 @@ struct
 (***************)
 
 (* types nommes*)
-type nommes =
-  | None
-  | Typedefglobal of string * typ
+type nommes = Typedefglobal of string * typ 
 (* Affectables *)
 type affectable =
   | Deref of affectable
@@ -93,9 +91,7 @@ end
 module AstTds =
 struct
    (* types nommes*)
-  type nommes =
-  | None
-  | Typedefglobal of Tds.info_ast * typ
+  type nommes = Typedefglobal of string * typ
 
   (* ajout pour les pointeurs *)
   type affectable =
@@ -134,7 +130,7 @@ struct
     (* ajout pour l'operateur d'assignation *)
     | Addition of affectable * expression
     (*definition local d'un type nommé *)
-    | Typedeflocal of Tds.info_ast * typ
+    | Typedeflocal of string * typ
 
 
 
@@ -153,12 +149,6 @@ end
 (* ******************************* *)
 module AstType =
 struct
-
-(* types nommes*)
-  type nommes =
-  | None
-  | Typedefglobal of Tds.info_ast * typ
-
 
 (* ajout pour les pointeurs *)
 type affectable =
@@ -202,14 +192,14 @@ type bloc = instruction list
   | Affectation of affectable * expression
   (* ajout pour l'operateur d'assignation *)
   | Addition of affectable * expression
-  | Typedeflocal of Tds.info_ast * typ
+  | Typedeflocal of string * typ
 
 
 (* informations associées à l'identificateur (dont son nom), liste des paramètres, corps *)
 type fonction = Fonction of Tds.info_ast * Tds.info_ast list * bloc
 
 (* Structure d'un programme dans notre langage *)
-type programme = Programme of nommes list * fonction list * bloc
+type programme = Programme of fonction list * bloc
 
 let taille_variables_declarees i =
   match i with

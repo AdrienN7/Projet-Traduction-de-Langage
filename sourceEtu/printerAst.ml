@@ -45,7 +45,6 @@ struct
   (* Conversion des types nommés*)
   let  string_of_nomme nomm =
     match nomm with
-    | None -> " "
     | Typedefglobal (n,t) -> "Typedef "^n^" = "^(string_of_type t)^" "
 
   (* Conversion des opérateurs unaires *)
@@ -95,7 +94,7 @@ struct
                                   "FAIRE \n"^((List.fold_right (fun i tq -> (string_of_instruction i)^tq) b ""))^"\n"
     | Retour (e) -> "Retour  : RETURN "^(string_of_expression e)^"\n"
     | Addition (n,e) ->  "Addition  : "^(string_of_affectable n)^" += "^(string_of_expression e)^"\n"
-
+    | Typedeflocal (n,t) -> "Typedef "^n^" = "^(string_of_type t)^" "
   (* Conversion des fonctions *)
   let string_of_fonction (Fonction(t,n,lp,li)) = (string_of_type t)^" "^n^" ("^((List.fold_right (fun (t,n) tq -> (string_of_type t)^" "^n^" "^tq) lp ""))^") = \n"^
                                         ((List.fold_right (fun i tq -> (string_of_instruction i)^tq) li ""))^"\n"

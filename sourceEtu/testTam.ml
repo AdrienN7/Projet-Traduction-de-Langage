@@ -2,7 +2,7 @@
 open Compilateur
 
 (* Changer le chemin d'accès du jar. *)
-let runtamcmde = "java -jar ../../runtam.jar"
+let runtamcmde = "java -jar ~/Annee_2/Traduction_language/tam/runtam.jar"
 (* let runtamcmde = "java -jar /mnt/n7fs/.../tools/runtam/runtam.jar" *)
 
 (* Execute the TAM code obtained from the rat file and return the ouptut of this code *)
@@ -127,3 +127,14 @@ runtam "../../fichiersRat/testprojet/testpointeurrat.rat";
 let%expect_test "testassignation" = 
 runtam   "../../fichiersRat/testprojet/testassignation.rat";
   [%expect{| 7[37/40] |}]
+
+let%expect_test "testNomme1" = 
+runtam   "../../fichiersRat/testprojet/testNomme1.rat";
+  [%expect{| 3 |}]
+
+let%expect_test "testNomme2" = 
+runtam   "../../fichiersRat/testprojet/testNomme2.rat";
+  [%expect{| 7 |}]
+
+
+

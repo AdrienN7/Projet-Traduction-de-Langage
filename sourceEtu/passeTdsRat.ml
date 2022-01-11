@@ -10,8 +10,18 @@ struct
   type t1 = Ast.AstSyntax.programme
   type t2 = Ast.AstTds.programme
 
+  let  analyse_tds_td tds tdl = 
+    match tdl with
+    | AstSyntax.Typedefglobal (n,t) -> begin
+                              match (chercherGlobalement tds n) with
+                              | Some _ -> raise (DoubleDeclaration n)
+                              | None ->  let info_t = InfoTyp (n,t) in
+                                let ia = info_to_info_ast info_t in
+                                ajouter tds n ia;
+                                Typedefglobal (n,t)
+                            end
 
-  (* analyse_tds_expression : AstSyntax.affectable -> AstTds.affectable *)
+  (* analyse_tds_affectable : AstSyntax.affectable -> AstTds.affectable *)
   (* Paramètre tds : la table des symboles courante *)
   (* Paramètre a : l'affectable à analyser *)
   (* Paramètre modif : boolen qui permet de savoir si la constant est modifié ou pas *)
@@ -34,7 +44,7 @@ struct
             | InfoConst (n,_) -> if modif then raise (MauvaiseUtilisationIdentifiant n)
                                  else Ident(ia)
             | InfoVar _ -> Ident(ia)
-            | InfoFun _ -> raise (MauvaiseUtilisationIdentifiant n)
+            | _ -> raise (MauvaiseUtilisationIdentifiant n)
           end
   
       end
@@ -174,6 +184,19 @@ let rec analyse_tds_instruction tds i =
       let na = analyse_tds_affectable tds true a1 in
       Addition(na, ne)
 
+  (* définition local d'un type nommé *)
+  | AstSyntax.Typedeflocal (n,t) -> begin
+                              match (chercherLocalement tds n) with
+                              (* Vérifie s'il n'est pas déja nommé localement *)
+                              | Some _ -> raise (DoubleDeclaration n)
+                              | None ->  let info_t = InfoTyp (n,t) in
+                                let ia = info_to_info_ast info_t in
+                                (* Créé l'infotyp l'ajoute à la tds *)
+                                ajouter tds n ia;
+                                (* renvoie l'instructuion avec l'info_ast *)
+                                Typedeflocal (n,t)
+                            end
+
       
 (* analyse_tds_bloc : AstSyntax.bloc -> AstTds.bloc *)
 (* Paramètre tds : la table des symboles courante *)
@@ -232,14 +255,16 @@ let analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li))  =
 (* Vérifie la bonne utilisation des identifiants et tranforme le programme
 en un programme de type AstTds.ast *)
 (* Erreur si mauvaise utilisation des identifiants *)
-let analyser (AstSyntax.Programme (fonctions,prog)) =
+let analyser (AstSyntax.Programme (tdl,fonctions,prog)) =
   (*creer la tds mere *)
   let tds = creerTDSMere () in
   (*analyse les fonction du programme *)
   let nf = List.map (analyse_tds_fonction tds) fonctions in 
   (*analyse le bloc du programme *)
   let nb = analyse_tds_bloc tds prog in
+  (*analyse les types nommé globalement *)
+  let ntdl = List.map (analyse_tds_td tds) tdl in
   (* Renvoie la Structure d'un programme dans notre langage *)
-  Programme (nf,nb)
+  Programme (ntdl,nf,nb)
 
 end

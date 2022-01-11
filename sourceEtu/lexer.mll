@@ -32,12 +32,40 @@
         "return",  RETURN;
         "new",     NEW;     (* ajout pour les pointeurs *)
         "null",    NULL;     (* ajout pour les pointeurs *)
-        "typedef"   TYPEDEF (*ajout pour les types nommés)
+        "typedef",  TYPEDEF (*ajout pour les types nommés *)
       ];
     fun id ->
       match Hashtbl.find_opt kws id with
       | Some kw -> kw
       | None -> ID id
+
+  let tident =     
+    let kws = Hashtbl.create 16 in
+    List.iter (fun (kw, token) -> Hashtbl.add kws kw token)
+      [
+        "const",   CONST;
+        "print",   PRINT;
+        "if",      IF;
+        "else",    ELSE;
+        "while",   WHILE;
+        "bool",    BOOL;
+        "int",     INT;
+        "rat",     RAT;
+        "call",    CALL;
+        "num",     NUM;
+        "denom",   DENOM;
+        "true",    TRUE;
+        "false",   FALSE;
+        "return",  RETURN;
+        "new",     NEW;     (* ajout pour les pointeurs *)
+        "null",    NULL;     (* ajout pour les pointeurs *)
+        "typedef",  TYPEDEF (*ajout pour les types nommés *)
+      ];
+    fun tid ->
+      match Hashtbl.find_opt kws tid with
+      | Some kw -> kw
+      | None -> TID tid
+
 }
 
 rule token = parse
