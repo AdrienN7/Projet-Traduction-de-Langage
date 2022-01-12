@@ -113,7 +113,7 @@ typ :
 | RAT     {Rat}
 | t=typ MULT {Pointeur (t)} (* Ajout du typ pointeurs*)
 | tn=TID   {Tident (tn)}        (*utilisation d'un type nommé*)
-| STRUCT AO d=dp AF {Enregistrement (d)}       (*ajout du type enregistrement*)
+| STRUCT AO d=dp AF {Record (d)}       (*ajout du type enregistrement*)
 
 
 e : 
