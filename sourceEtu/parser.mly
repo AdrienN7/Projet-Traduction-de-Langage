@@ -46,10 +46,6 @@ open Ast.AstSyntax
 %token TYPEDEF
 %token <string> TID
 
-(*ajout pour les enregistrements *)
-%token STRUCT
-%token PT
-
 (* Type de l'attribut synthétisé des non-terminaux *)
 %type <programme> prog
 %type <nommes list> td
@@ -101,7 +97,6 @@ i :
 a : (*implentation de l'affectable*)
 | n=ID       {Ident (n)} 
 | PO MULT a1=a PF {Deref (a1)} 
-| PO a1=a PT n=ID PF {Acces(a1,n)}
 
 dp :
 |                         {[]}
@@ -113,7 +108,6 @@ typ :
 | RAT     {Rat}
 | t=typ MULT {Pointeur (t)} (* Ajout du typ pointeurs*)
 | tn=TID   {Tident (tn)}        (*utilisation d'un type nommé*)
-| STRUCT AO d=dp AF {Enregistrement (d)}       (*ajout du type enregistrement*)
 
 
 e : 
@@ -134,7 +128,6 @@ e :
 | NULL                    {Null}  
 | PO NEW t=typ PF         {New (t)}    
 | ET n=ID                 {Adresse (n)} 
-| AO cp1=cp AF            {Enregistrement (cp1)}
 
 
 

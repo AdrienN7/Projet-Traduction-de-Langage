@@ -24,8 +24,6 @@ type nommes = Typedefglobal of string * typ
 type affectable =
   | Deref of affectable
   | Ident of string
-  (* acces `a un champ de l’enregistrement *)
-  | Acces of affectable * string
 
 (* Opérateurs unaires de Rat *)
 type unaire = Numerateur | Denominateur
@@ -51,10 +49,6 @@ type expression =
   | Affectable of affectable
   | Adresse of string
   | New of typ
-
-  (* creation d’un enregistrement avec la liste des valeurs de ses champs *)
-  | Enregistrement of expression list
-
 
 (* Instructions de Rat *)
 type bloc = instruction list

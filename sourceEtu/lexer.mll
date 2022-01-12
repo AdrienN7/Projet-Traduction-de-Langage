@@ -33,7 +33,6 @@
         "new",     NEW;     (* ajout pour les pointeurs *)
         "null",    NULL;     (* ajout pour les pointeurs *)
         "typedef",  TYPEDEF (*ajout pour les types nommés *)
-        "struct",  STRUCT (*ajout pour les enregistrement*)
       ];
     fun id ->
       match Hashtbl.find_opt kws id with
@@ -61,7 +60,6 @@
         "new",     NEW;     (* ajout pour les pointeurs *)
         "null",    NULL;     (* ajout pour les pointeurs *)
         "typedef",  TYPEDEF (*ajout pour les types nommés *)
-        "struct",  STRUCT (*ajout pour les enregistrement*)
       ];
     fun tid ->
       match Hashtbl.find_opt kws tid with
@@ -92,7 +90,6 @@ rule token = parse
 | "*"          { MULT }
 | "<"          { INF }
 | "&"          { ET } (* ajout pour pointeurs *)
-| "."          { PT } (*ajout pour l'enregistrement*)
 
 (* constantes entières *)
 | ("-")?['0'-'9']+ as i
