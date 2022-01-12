@@ -1,3 +1,4 @@
+(*
 open Compilateur
 open Exceptions
 
@@ -559,3 +560,4 @@ let%test_unit "code_testfun6" =
 let%test_unit "code_testfuns" = 
 let _ = compiler   "../../fichiersRat/src-rat-tam-test/testfuns.rat" in ()
 
+*)

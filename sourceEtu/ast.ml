@@ -24,7 +24,7 @@ type nommes = Typedefglobal of string * typ
 type affectable =
   | Deref of affectable
   | Ident of string
-  (* acces `a un champ de l’enregistrement *)
+  (* acces à un champ de l’enregistrement *)
   | Acces of affectable * string
 
 (* Opérateurs unaires de Rat *)
@@ -103,6 +103,8 @@ struct
   type affectable =
     | Deref of affectable
     | Ident of Tds.info_ast
+    (* acces à un champ de l’enregistrement *)
+    | Acces of affectable * Tds.info_ast
 
   (* Expressions existantes dans notre langage *)
   (* ~ expression de l'AST syntaxique où les noms des identifiants ont été
@@ -118,6 +120,8 @@ struct
     | Affectable of affectable
     | Adresse of Tds.info_ast
     | New of typ
+    (* creation d’un enregistrement avec la liste des valeurs de ses champs *)
+    | Enregistrement of expression list
 
   (* instructions existantes dans notre langage *)
   (* ~ instruction de l'AST syntaxique où les noms des identifiants ont été

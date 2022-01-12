@@ -41,6 +41,7 @@ struct
     match a with
       | Deref a1 -> "* "^(string_of_affectable a1)^" "
       | Ident n -> n^" "
+      | Acces (a1,n) -> (string_of_affectable a1)^" "^n^" "
 
   (* Conversion des types nommés*)
   let  string_of_nomme nomm =
@@ -79,6 +80,7 @@ struct
           | Fraction -> "["^(string_of_expression e1)^"/"^(string_of_expression e2)^"] "
           | _ -> (string_of_expression e1)^(string_of_binaire b)^(string_of_expression e2)^" "
         end
+    | Enregistrement le -> "{ "^(List.fold_right (fun x y -> (string_of_expression x)^y) le "")^" }"
 
   (* Conversion des instructions *)
   let rec string_of_instruction i =

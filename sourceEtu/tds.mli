@@ -11,11 +11,14 @@ type info =
   | InfoFun of string * typ * typ list
   (* Information associée à un type nommés : son nom, son type*)
   | InfoTyp of string * typ 
+
+  | InfoRecord of string * info_ast list
+  
+(* Données stockées dans la tds et dans les AST : pointeur sur une information *)
+and info_ast
 (* Table des symboles *)
 type tds 
 
-(* Données stockées dans la tds et dans les AST : pointeur sur une information *)
-type info_ast
 
 (* Création d'une table des symboles à la racine *)
 val creerTDSMere : unit -> tds 

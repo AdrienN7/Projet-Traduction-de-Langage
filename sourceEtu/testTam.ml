@@ -1,4 +1,4 @@
-
+(*
 open Compilateur
 
 (* Changer le chemin d'accès du jar. *)
@@ -138,3 +138,4 @@ runtam   "../../fichiersRat/testprojet/testNomme2.rat";
 
 
 
+*)

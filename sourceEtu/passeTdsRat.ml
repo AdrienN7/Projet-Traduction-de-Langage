@@ -9,6 +9,46 @@ struct
 
   type t1 = Ast.AstSyntax.programme
   type t2 = Ast.AstTds.programme
+  
+  let rec trouverIa iaa1 =
+    match iaa1 with
+    | Deref(a1) -> trouverIa a1
+    | Ident(ia) -> ia
+    | Acces _ -> failwith ("Impossible")
+
+  (*retorun ia de l'element dans la structure *)
+  let rec trouvern n lia =
+    match lia with 
+    | [] -> raise (MauvaiseUtilisationIdentifiant n) 
+    | ia::q -> let info = info_ast_to_info ia in
+               begin match info with
+                 | InfoVar(n1,_,_,_) -> if (n = n1) then ia else (trouvern n q)
+                  | InfoConst (n1,_) -> raise (MauvaiseUtilisationIdentifiant n1)
+                  | InfoTyp (n1,_) -> raise (MauvaiseUtilisationIdentifiant n1)
+                  | InfoFun (n1,_,_) -> raise (MauvaiseUtilisationIdentifiant n1)
+                  | InfoRecord (n1,_) -> if (n1 = n) then ia else (trouvern n q)
+               end
+
+
+  let trouverIAdeN n iaa1 =
+    let ia = trouverIa iaa1 in
+    let info = info_ast_to_info ia in
+    match info with
+    | InfoRecord (_,lia) -> let ian = (trouvern n lia) in
+                              ian
+    | InfoConst (n1,_) -> raise (MauvaiseUtilisationIdentifiant n1) 
+    | InfoVar (n1,_,_,_) -> raise (MauvaiseUtilisationIdentifiant n1)
+    | InfoTyp (n1,_) -> raise (MauvaiseUtilisationIdentifiant n1)
+    | InfoFun (n1,_,_) -> raise (MauvaiseUtilisationIdentifiant n1)
+
+  let analyse_tds_record tds (t,n)=
+    match (chercherLocalement tds n) with
+    | Some _ -> raise (DoubleDeclaration n)
+    | None -> let info = InfoVar (n, t, 0, "") in 
+              let ia = info_to_info_ast info in
+              ajouter tds n ia;
+              ia
+
 
   let  analyse_tds_td tds tdl = 
     match tdl with
@@ -44,23 +84,18 @@ struct
             | InfoConst (n,_) -> if modif then raise (MauvaiseUtilisationIdentifiant n)
                                  else Ident(ia)
             | InfoVar _ -> Ident(ia)
+            | InfoRecord _ -> Ident(ia)
             | _ -> raise (MauvaiseUtilisationIdentifiant n)
           end
     end
   | AstSyntax.Acces (a1,n) -> 
   begin
-      match (chercherGlobalement tds n) with
-        | None ->  raise (IdentifiantNonDeclare n)
-        | Some ia -> 
-          begin  
-            match (info_ast_to_info ia) with
-            (* Si c'est une contente et qu'elle est modifié on cri *)
-            | InfoConst (n,_) -> if modif then raise (MauvaiseUtilisationIdentifiant n)
-                                 else Acces(analyse_tds_affectable tds modif a1 ,ia)
-            | InfoVar _ -> Acces(analyse_tds_affectable tds modif a1 ,ia)
-            | _ -> raise (MauvaiseUtilisationIdentifiant n)
-          end
-  
+      match (chercherLocalement tds n) with
+        | Some _ ->  raise (DoubleDeclaration n)
+        | None -> 
+                    let iaa1 = (analyse_tds_affectable tds modif a1) in
+                    let ia = (trouverIAdeN n iaa1) in
+                    Acces(iaa1,ia)
   end
 
 (* analyse_tds_expression : AstSyntax.expression -> AstTds.expression *)
@@ -107,7 +142,7 @@ let rec analyse_tds_expression tds e =
   (*Unaire et binaire renvoie la même structure avec l'annalyse de leur expression *)
   | AstSyntax.Unaire (u, e1) -> Unaire (u, (analyse_tds_expression tds e1))
   | AstSyntax.Binaire (b, e1, e2) -> Binaire (b, analyse_tds_expression tds e1, analyse_tds_expression tds e2)
-  | AstSyntax.Enregistrement (l) -> Enregistrement (List.map(analyse_tds_expression tds)l)
+  | AstSyntax.Enregistrement l -> Enregistrement (List.map(analyse_tds_expression tds) l)
 
 
   
@@ -128,15 +163,24 @@ let rec analyse_tds_instruction tds i =
             (* Vérification de la bonne utilisation des identifiants dans l'expression *)
             (* et obtention de l'expression transformée *) 
             let ne = analyse_tds_expression tds e in
-            (* Création de l'information associée à l'identfiant *)
-            let info = InfoVar (n,t, 0, "") in
-            (* Création du pointeur sur l'information *)
-            let ia = info_to_info_ast info in
-            (* Ajout de l'information (pointeur) dans la tds *)
-            ajouter tds n ia;
-            (* Renvoie de la nouvelle déclaration où le nom a été remplacé par l'information 
-            et l'expression remplacée par l'expression issue de l'analyse *)
-            Declaration (t, ia, ne) 
+            begin
+            match t with 
+            | Record lt -> let lia = List.map (analyse_tds_record tds) lt in
+                           let info = InfoRecord(n,lia) in
+                           let ia = (info_to_info_ast info) in
+                           ajouter tds n ia;
+                           Declaration (t, ia, ne)
+            | _ ->
+              (* Création de l'information associée à l'identfiant *)
+              let info = InfoVar (n,t, 0, "") in
+              (* Création du pointeur sur l'information *)
+              let ia = info_to_info_ast info in
+              (* Ajout de l'information (pointeur) dans la tds *)
+              ajouter tds n ia;
+              (* Renvoie de la nouvelle déclaration où le nom a été remplacé par l'information 
+              et l'expression remplacée par l'expression issue de l'analyse *)
+              Declaration (t, ia, ne) 
+            end
         | Some _ ->
             (* L'identifiant est trouvé dans la tds locale, 
             il a donc déjà été déclaré dans le bloc courant *) 
