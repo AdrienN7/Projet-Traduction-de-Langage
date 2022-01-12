@@ -46,8 +46,22 @@ struct
             | InfoVar _ -> Ident(ia)
             | _ -> raise (MauvaiseUtilisationIdentifiant n)
           end
+    end
+  | AstSyntax.Acces (a1,n) -> 
+  begin
+      match (chercherGlobalement tds n) with
+        | None ->  raise (IdentifiantNonDeclare n)
+        | Some ia -> 
+          begin  
+            match (info_ast_to_info ia) with
+            (* Si c'est une contente et qu'elle est modifié on cri *)
+            | InfoConst (n,_) -> if modif then raise (MauvaiseUtilisationIdentifiant n)
+                                 else Acces(analyse_tds_affectable tds modif a1 ,ia)
+            | InfoVar _ -> Acces(analyse_tds_affectable tds modif a1 ,ia)
+            | _ -> raise (MauvaiseUtilisationIdentifiant n)
+          end
   
-      end
+  end
 
 (* analyse_tds_expression : AstSyntax.expression -> AstTds.expression *)
 (* Paramètre tds : la table des symboles courante *)
@@ -93,7 +107,7 @@ let rec analyse_tds_expression tds e =
   (*Unaire et binaire renvoie la même structure avec l'annalyse de leur expression *)
   | AstSyntax.Unaire (u, e1) -> Unaire (u, (analyse_tds_expression tds e1))
   | AstSyntax.Binaire (b, e1, e2) -> Binaire (b, analyse_tds_expression tds e1, analyse_tds_expression tds e2)
-
+  | AstSyntax.Enregistrement (l) -> Enregistrement (List.map(analyse_tds_expression tds)l)
 
 
   
