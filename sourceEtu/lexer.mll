@@ -32,7 +32,7 @@
         "return",  RETURN;
         "new",     NEW;     (* ajout pour les pointeurs *)
         "null",    NULL;     (* ajout pour les pointeurs *)
-        "typedef",  TYPEDEF (*ajout pour les types nommés *)
+        "typedef",  TYPEDEF; (*ajout pour les types nommés *)
         "struct",  STRUCT (*ajout pour les enregistrement*)
       ];
     fun id ->
@@ -60,7 +60,7 @@
         "return",  RETURN;
         "new",     NEW;     (* ajout pour les pointeurs *)
         "null",    NULL;     (* ajout pour les pointeurs *)
-        "typedef",  TYPEDEF (*ajout pour les types nommés *)
+        "typedef",  TYPEDEF; (*ajout pour les types nommés *)
         "struct",  STRUCT (*ajout pour les enregistrement*)
       ];
     fun tid ->

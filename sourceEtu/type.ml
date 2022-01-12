@@ -1,4 +1,4 @@
-type typ = Bool | Int | Rat | Undefined | Pointeur of typ | Tident of string | Enregistrement of (typ*string) list
+type typ = Bool | Int | Rat | Undefined | Pointeur of typ | Tident of string | Record of (typ*string) list
 
 
 (* ajout de la récursivité pour les pointeurs*)
@@ -8,9 +8,9 @@ let rec string_of_type t =
   | Int  ->  "Int"
   | Rat  ->  "Rat"
   | Undefined -> "Undefined"
-  | Pointeur a -> "Pointeur of "^(string_of_type a)
+  | Pointeur a -> (string_of_type a)^" *"
   | Tident n ->   "Tident of"^n 
-  | Enregistrement l -> ""
+  | Record l -> "struct {"^(List.fold_right (fun (ty,no) y -> (string_of_type ty)^" "^no^" "^y) l "")^"}"
 
 
 let rec est_compatible t1 t2 =
@@ -63,7 +63,7 @@ let%test _ = not (est_compatible_list [Int] [Rat ; Int])
 let%test _ = not (est_compatible_list [Int ; Rat] [Rat ; Int])
 let%test _ = not (est_compatible_list [Bool ; Rat ; Bool] [Bool ; Rat ; Bool ; Int])
 
-let getTaille t =
+let rec getTaille t =
   match t with
   | Int -> 1
   | Bool -> 1
@@ -71,6 +71,7 @@ let getTaille t =
   | Undefined -> 0
   | Pointeur _ -> 1
   | Tident _ -> failwith("Impossible") (* lors de la gestion de typage Tident est toujours remplacé *)
+  | Record l -> List.fold_right (fun (ty,_) y -> (getTaille ty)+y) l 0
   
 let%test _ = getTaille Int = 1
 let%test _ = getTaille Bool = 1
@@ -80,3 +81,4 @@ let%test _ = getTaille (Pointeur Int) = 1
 let%test _ = getTaille (Pointeur Bool) = 1
 let%test _ = getTaille (Pointeur Rat) = 1
 let%test _ = getTaille (Pointeur (Pointeur Int)) = 1
+(* Ajout pour les enregistrements *)
