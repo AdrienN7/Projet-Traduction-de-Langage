@@ -200,8 +200,6 @@ type bloc = instruction list
   | Empty (* les nœuds ayant disparus: Const *)
   (**** modification pour les pointeurs ****)
   | Affectation of affectable * expression
-  (* ajout pour l'operateur d'assignation *)
-  | Addition of affectable * expression
   | Typedeflocal of string * typ
 
 

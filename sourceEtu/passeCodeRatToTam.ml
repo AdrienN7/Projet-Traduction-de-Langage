@@ -194,7 +194,6 @@ struct
                   (* retour de la fonction avec la taille du type retour et la taille des paramètres appelés *)
     | Empty -> ""
 
-    | Addition (a,e) -> (analyser_tam_expression e)^"\n"^(analyser_tam_affectable a false false)
 
 
         
