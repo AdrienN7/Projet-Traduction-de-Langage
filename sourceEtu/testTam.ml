@@ -128,6 +128,7 @@ let%expect_test "testassignation" =
 runtam   "../../fichiersRat/testprojet/testassignation.rat";
   [%expect{| 7[37/40] |}]
 
+(* ajout pour les types nommés *)
 let%expect_test "testNomme1" = 
 runtam   "../../fichiersRat/testprojet/testNomme1.rat";
   [%expect{| 3 |}]
@@ -136,5 +137,24 @@ let%expect_test "testNomme2" =
 runtam   "../../fichiersRat/testprojet/testNomme2.rat";
   [%expect{| 7 |}]
 
+(* !!!! ne passent pas !!!!!!!!!
 
+(* ajout pour les enregistrements *) 
+let%expect_test "record1" = 
+runtam   "../../fichiersRat/testprojet/record1.rat";
+  [%expect{| 3[1/4] |}]
 
+let%expect_test "record2" = 
+runtam   "../../fichiersRat/testprojet/record2.rat";
+  [%expect{| 4835 |}]
+
+let%expect_test "record3" = 
+runtam   "../../fichiersRat/testprojet/record3.rat";
+  [%expect{| 12 |}]
+
+(* Test du programme final *)
+let%expect_test "programmeFinal" = 
+runtam   "../../fichiersRat/testprojet/programmeFinal.rat";
+  [%expect{| [13/-12][1/6]false[-221/84][1/-14] |}]
+
+*)

@@ -560,3 +560,11 @@ let%test_unit "code_testfun6" =
 let%test_unit "code_testfuns" = 
 let _ = compiler   "../../fichiersRat/src-rat-tam-test/testfuns.rat" in ()
 
+(* assignation *)
+
+let%test_unit "addEgBool" = 
+try
+let _ = compiler   "../../fichiersRat/testprojet/addEgBool.rat"
+in raise ErreurNonDetectee
+with
+| TypeInattendu (Bool,Bool)  -> () (* le vrai problème c'est qu'on ne peut pas effectuer une addition sur des bool *)

@@ -22,6 +22,15 @@ struct
     | InfoVar (_,t,_,_) -> t
     | _ -> raise (InfoInattendu "Infovar")
 
+  (* test unitaire de get_type *)
+  let%test _ = get_type (info_to_info_ast (InfoVar("toto",Int,1,"SB")))  = Int
+  let%test_unit _ = 
+  try 
+    let _ =  get_type (info_to_info_ast (InfoFun ("todo",Int,[])))
+    in raise ErreurNonDetectee
+  with
+  | (InfoInattendu "Infovar") -> ()
+
   (* taille_variables : AstType.instruction -> int                                   *)
   (* Paramètre i : intruction dont on veut connaitre si des variables sont déclarées *)
   (* Renvoie la taille du type de la variable si c'est une déclaration de variable   *)
@@ -29,6 +38,10 @@ struct
     match i with
     | AstType.Declaration (n, _) -> (getTaille (get_type n))
     | _ -> 0
+  
+  (* test unitaire de get_type *)
+  let%test _ = taille_variables (Empty)  = 0
+  
 
   (* get_dep_reg : Tds.info_ast -> (int * string)                           *)
   (* Paramètre ia : variable dont on veut connaitre le placement en mémoire *)
@@ -38,6 +51,16 @@ struct
     match (info_ast_to_info ia) with
     | InfoVar (_,_,dep,reg) -> (dep,reg)
     | _ -> raise (InfoInattendu "Infovar")
+
+  (* test unitaire de get_dep_reg *)
+  let%test _ = get_dep_reg (info_to_info_ast (InfoVar("toto",Int,1,"SB")))  = (1,"SB")
+  let%test_unit _ = 
+  try 
+    let _ =  get_dep_reg (info_to_info_ast (InfoFun ("todo",Int,[])))
+    in raise ErreurNonDetectee
+  with
+  | (InfoInattendu "Infovar") -> ()
+ 
 
   (* getTaillePointeur : typ -> int                                 *)
   (* Paramètre t : type du pointeur                                 *)

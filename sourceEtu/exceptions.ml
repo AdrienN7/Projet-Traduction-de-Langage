@@ -14,5 +14,8 @@ exception InfoInattendu of string
 exception RetourDansMain
 
 exception Erreur_type_nomme
+exception ErreurNonDetectee
+exception ErreurAffectableImpossible
+exception ErreurEnregistrement
 
 

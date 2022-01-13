@@ -17,7 +17,16 @@ struct
     match iaa1 with
     | Deref(a1) -> trouverIa a1
     | Ident(ia) -> ia
-    | Acces _ -> failwith ("Impossible")
+    | Acces _ -> raise ErreurAffectableImpossible
+
+  (* test unitaire de trouverIa *)
+  let%test _ = trouverIa (Deref(Ident(info_to_info_ast (InfoVar("toto",Int,1,"SB")))))  = info_to_info_ast (InfoVar("toto",Int,1,"SB"))
+  let%test_unit _ = 
+  try 
+    let _ =  trouverIa (Acces(Ident(info_to_info_ast (InfoVar("toto",Int,1,"SB"))),info_to_info_ast (InfoVar("toto",Int,1,"SB"))))
+    in raise ErreurNonDetectee
+  with
+  | ErreurAffectableImpossible -> ()
 
   (* trouvern : string -> info_ast list -> info_ast                  *)
   (* Paramètre n : le nom du champ recherché                         *)

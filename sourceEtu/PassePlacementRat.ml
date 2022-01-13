@@ -11,28 +11,26 @@ struct
   type t1 = Ast.AstType.programme
   type t2 = Ast.AstPlacement.programme
   
-  (*retourne le type*)
-  (*paramètre ia : info ast*) 
+  (* get_type : Tds.info_ast -> typ                  *)
+  (* Paramètre ia : l'info ast de la variable        *)
+  (* renvoie le typ de la variable                   *)
+  (* Erreur si mauvaise utilisation des identifiants *)
   let get_type ia =  
     match info_ast_to_info ia with
     | InfoVar (_,t,_,_) -> t
     | _ -> raise (InfoInattendu "Infovar")
+  (*Pour les tests de cette fonction voir passeCodeRatToTam *)
 
 
-(* analyse_placement_expression : AstType.expression -> AstPlacement.expression * typ *)
-(* Paramètre e : l'expression à analyser *)
-(* Vérifie la bonne utilisation des type et tranforme l'AstTds.expression
-en une expression de type AstType.expression et renvoie le type de l'expression *)
-(* Erreur si mauvaise utilisation des types *)
+
 
 
   
-(* analyse_type_instruction : typ option -> AstTds.instruction -> AstTypeInstruction *)
-(* Paramètre tf : le type attendu de l'instruction *)
+(* analyse_instruction : typ option -> AstType.instruction -> AstPlacement.instruction *)
+(* Paramètre reg : le déplacement actuel de la pile *)
+(* Paramètre dep : le pointeur d'indication de la pile *)
 (* Paramètre i : l'instruction à analyser *)
-(* Vérifie la bonne utilisation des types et tranforme l'instruction de type AstTds.instruction
-en une instruction de type AstType.instruction *)
-(* Erreur si mauvaise utilisation des types *)
+(* modifie l'ast des varaibles de l'instruction avec les bons emplacements de stockage *)
 let rec analyse_instruction reg dep i =
   match i with
   | AstType.Declaration (ia, _) -> let a = (getTaille (get_type ia)) in
@@ -46,12 +44,11 @@ let rec analyse_instruction reg dep i =
   | _ -> (i,dep)
 
       
-(* analyse_type_bloc : typ option -> AstTds.bloc -> AstType.bloc *)
-(* Paramètre tf : : le type retour attendu du bloc *)
+(* analyse_bloc : typ option -> AstType.bloc -> AstPlacement.bloc *)
+(* Paramètre reg : le déplacement actuel de la pile *)
+(* Paramètre dep : le pointeur d'indication de la pile *)
 (* Paramètre li : liste d'instructions à analyser *)
-(* Vérifie la bonne utilisation des types et tranforme le bloc de type 
-AstTds.bloc en un bloc de type AstType.bloc *)
-(* Erreur si mauvaise utilisation des types *)
+(* modifie l'ast des variables du bloc avec les bons emplacements de stockage *)
 and analyser_bloc reg dep li =
   match li with
   | [] -> []
@@ -59,30 +56,30 @@ and analyser_bloc reg dep li =
             ni ::analyser_bloc reg ndep q
 
 
-(* analyse_type_param : type * info_ast -> type * info_ast *)
+(* analyse_param : type * info_ast -> type * info_ast *)
 (* Paramètre : liste des paramètre de la fonction *)
-(* modifie l'ast avec les bon paramètres *)
+(* modifie l'ast des paramètre avec les bons emplacements de stockage *)
 let rec analyse_param dep rlp =
   match rlp with
   | [] -> []
   | ia::q -> let t = (getTaille (get_type ia)) in
              modifier_adresse_info (dep - t) "LB" ia;
              ia::(analyse_param (dep - t) q)
-(* analyse_type_fonctionRetour : AstTds.fonction -> AstType.fonction *)
+
+
+(* analyse_fonctionRetour : AstType.fonction -> AstPlacement.fonction *)
 (* Paramètre : l'AstTds.fonction à analyser *)
-(* Vérifie la bonne utilisation des type et tranforme la fonction de
-type AstTds.fonction en une fonction de type AstType.fonction *)
-(* Erreur si mauvaise utilisation des types *)
+(* modifie l'ast des différentes variables de la fonction avec les bons emplacements de stockage *)
+
 let analyser_fonction (AstType.Fonction(ia,lp,b))  =
   let nb = (analyser_bloc "LB" 3 b) in
   let nlp = analyse_param 0 (List.rev lp) in
   Fonction(ia, nlp, nb)
 
-(* analyser : AstTds.ast -> AstType.ast *)
+(* analyser : AstType.ast -> AstType.ast *)
 (* Paramètre : l'AstTds à analyser *)
-(* Vérifie la bonne utilisation des types et tranforme le programme
-de type AstTds.ast en un programme de type AstTds.ast *)
-(* Erreur si mauvaise utilisation des types *)
+(* modifie l'ast des différentes variables du programme avec les bons emplacements de stockage *)
+
 let analyser (AstType.Programme (lf,b)) =
   let nlf = List.map (analyser_fonction) lf in
   let nb = analyser_bloc "SB" 0 b in

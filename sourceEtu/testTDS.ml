@@ -355,8 +355,10 @@ let%test_unit "code_testfuns" =
 let%test_unit "code_complique" = 
   let _ = compiler   "../../fichiersRat/src-rat-tam-test/complique.rat" in ()
 
+(* Pointeurs *)
 let%test_unit "testpointeurs" = 
   let _ = compiler "../../fichiersRat/testprojet/testpointeurs.rat" in ()
+
 
 
 (* test Enregistrement !!!!!!!!!!!Les tests commentés ne passent pas!!!!!!!!!!!!! *) 

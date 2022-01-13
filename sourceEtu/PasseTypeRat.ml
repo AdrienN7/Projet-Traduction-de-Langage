@@ -12,9 +12,6 @@ struct
   type t2 = Ast.AstType.programme
 
   
-
-
-  
   (* get_type_param : info_ast -> typ                  *)
   (* paramètre ia : info_ast de la fonction            *)
   (* récupère les types des parametre de la fonction   *) 
@@ -23,6 +20,15 @@ struct
       match info_ast_to_info ia with
       | InfoFun (_, _, tl) -> tl
       | _ -> raise (InfoInattendu "InfoFun")
+
+  (* test unitaire de get_type_param *)
+  let%test _ = get_type_param (info_to_info_ast (InfoFun ("todo",Int,[Rat])) )  = [Rat]
+  let%test_unit _ = 
+  try 
+    let _ =  get_type_param (info_to_info_ast (InfoVar("toto",Int,1,"SB")) )
+    in raise ErreurNonDetectee
+  with
+  | (InfoInattendu "InfoFun") -> ()
       
   (* get_type_return : info_ast -> typ                 *)
   (* paramètre ia : info_ast de la fonction            *)
@@ -33,6 +39,15 @@ struct
         | InfoFun (_,t,_) -> t
         | _ -> raise (InfoInattendu "InfoFun")
 
+  (* test unitaire de get_type_param *)
+  let%test _ = get_type_return (info_to_info_ast (InfoFun ("todo",Int,[Rat])) )  = Int
+  let%test_unit _ = 
+  try 
+    let _ =  get_type_return (info_to_info_ast (InfoVar("toto",Int,1,"SB")) )
+    in raise ErreurNonDetectee
+  with
+  | (InfoInattendu "InfoFun") -> ()
+
   (* get_type : info_ast -> typ                        *)
   (* paramètre ia : info_ast de la variable            *)
   (* récupère le type de la variable                   *) 
@@ -41,12 +56,14 @@ struct
         match info_ast_to_info ia with
         | InfoVar (_,t,_,_) -> t
         | _ -> raise (InfoInattendu "Infovar")
+  (*Pour les tests de cette fonction voir passeCodeRatToTam *)
 
+  
   (* analyse_type_affectable : AstTds.affectable-> AstType.affectable            *)
   (* Paramètre a : l'affectable à analyser                                       *)
   (* Vérifie la bonne utilisation des type et tranforme l'AstTds.affectable      *)
   (* en une affectable de type AstType.affectable et l'affectable                *)
-  (* Erreur si mauvaise utilisation des types                                     *)
+  (* Erreur si mauvaise utilisation des types                                    *)
   let rec analyse_type_affectable a =
     match a with
     (*Deref: renvoie la structure du deref d'astType.affectable avec l'afectable pointé et le type du pointeur *)
@@ -128,7 +145,7 @@ let rec analyse_type_expression e =
   | AstTds.Enregistrement le -> (List.fold_right (fun x y -> let (e1,_) = (analyse_type_expression x) in
                                                                   begin match y with
                                                                   | Enregistrement a -> Enregistrement (e1::a)
-                                                                  | _ -> failwith("impossible")
+                                                                  | _ -> raise ErreurEnregistrement
                                                                   end)
                                                 le (Enregistrement [])), Undefined(* pas enocre traité *) 
 
@@ -136,10 +153,15 @@ let rec analyse_type_expression e =
 (* Paramètre ltn : liste des types nommés                                    *)
 (* Paramètre nt : type nommé à ajouter à la liste                            *)
 (* Renvoie la liste des type nommés mis à jour                               *)                                           
-let rec ajouterListNomme ltn nt = 
+let rec ajouterListNomme ltn (nt,tn) = 
     match ltn with
-    | []   -> [nt]
-    | t::q -> if (t = nt) then nt::q else (ajouterListNomme q nt)
+    | []   -> [(nt,tn)]
+    | (n,t)::q -> if (n = nt) then (nt,tn)::q else (n,t)::(ajouterListNomme q (nt,tn))
+
+(* test unitaire de ajouterListNomme *)
+  let%test _ = ajouterListNomme [("todo", Int)] ("todo", Int)   = [("todo", Int)]
+  let%test _ =  ajouterListNomme [] ("todo", Int)  = [("todo", Int)]
+  let%test _ = ajouterListNomme [("todo", Rat)] ("todo1", Int)   = [("todo", Rat);("todo1", Int)]
 
 (* changer_type : string -> (string*typ) list -> typ              *)
 (* Paramètre ltn : liste des types nommés                         *)
@@ -150,6 +172,17 @@ let rec changer_type tn ltn =
   | [] -> raise (Erreur_type_nomme)
   | (n,t)::q -> if (n=tn) then t 
                 else (changer_type tn q)
+
+(* test unitaire changer_type *)
+ let%test _ = changer_type "todo" [("todo", Int)] = Int
+let%test _ = changer_type "todo1" [("todo", Int);("todo1", Rat)] = Rat
+let%test_unit _ = 
+  try 
+    let _ =  changer_type "todo" []   = [("todo", Int)]
+    in raise ErreurNonDetectee
+  with
+  | (Erreur_type_nomme) -> ()
+
 
 (* analyse_type_instruction : typ option -> AstTds.instruction -> AstTypeInstruction *)
 (* Paramètre tf : le type attendu de l'instruction *)
