@@ -128,6 +128,10 @@ let%expect_test "testassignation" =
 runtam   "../../fichiersRat/testprojet/testassignation.rat";
   [%expect{| 7[37/40] |}]
 
+let%expect_test "testassignation2" = 
+runtam   "../../fichiersRat/testprojet/testassignation2.rat";
+  [%expect{| 45 |}]
+
 (* ajout pour les types nommés *)
 let%expect_test "testNomme1" = 
 runtam   "../../fichiersRat/testprojet/testNomme1.rat";

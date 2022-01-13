@@ -1,0 +1,10 @@
+main {
+    typedef Int2 = int;
+    Int2 a = 1;
+    a += 3;
+    print a;
+    int * px = (new int);
+    (*px) = 2;
+    (* px) += 3;
+    print (*px);
+}
