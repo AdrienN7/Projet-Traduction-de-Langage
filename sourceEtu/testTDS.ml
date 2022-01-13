@@ -359,7 +359,7 @@ let%test_unit "testpointeurs" =
   let _ = compiler "../../fichiersRat/testprojet/testpointeurs.rat" in ()
 
 
-(* test Enregistrement *)
+(* test Enregistrement *) (*
 let%test_unit "testrecord1" = 
   let _ = compiler "../../fichiersRat/testprojet/record1.rat" in ()
 
@@ -392,5 +392,7 @@ try
   in raise ErreurNonDetectee
 with
 | MauvaiseUtilisationIdentifiant("x") -> ()
+
+*)
 
 
