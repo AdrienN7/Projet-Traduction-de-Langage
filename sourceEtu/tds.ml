@@ -290,6 +290,7 @@ let string_of_info info =
   | InfoFun (n,t,tp) -> "Fonction "^n^" : "^(List.fold_right (fun elt tq -> if tq = "" then (string_of_type elt) else (string_of_type elt)^" * "^tq) tp "" )^
                       " -> "^(string_of_type t)
   | InfoTyp (n,t) -> "Type"^n^(string_of_type t)
+  | InfoRecord _ -> "TODO" (* TODO *)
 
 (* Affiche la tds locale *)
 let afficher_locale tds =

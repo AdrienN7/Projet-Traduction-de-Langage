@@ -61,7 +61,9 @@ struct
                    (*le cas si dessous ne doit jamais arriver *)
                   | InfoFun (n, _, _) -> raise (MauvaiseUtilisationIdentifiant n)
                   | InfoTyp (n,_) -> raise (MauvaiseUtilisationIdentifiant n)
+                  | InfoRecord _ -> failwith("TODO")
                   end
+    | AstTds.Acces (a,ia) -> let a1,t1 = (analyse_type_affectable a) in (Acces (a1,ia), t1) (* TODO *)
 
 
 
@@ -119,8 +121,16 @@ let rec analyse_type_expression e =
   | AstTds.Null -> (Null, (Pointeur Undefined))
   | AstTds.New t -> (New(t), t)
   | AstTds.Affectable a -> let s,t = (analyse_type_affectable a) in 
-                           (Affectable (s,2022), t)
+                           (Affectable s, t)
   | AstTds.Adresse ia -> ((Adresse ia), (get_type ia))
+
+  (* TODO *)
+  | AstTds.Enregistrement le -> (List.fold_right (fun x y -> let (e1,_) = (analyse_type_expression x) in
+                                                                  begin match y with
+                                                                  | Enregistrement a -> Enregistrement (e1::a)
+                                                                  | _ -> failwith("impossible")
+                                                                  end)
+                                                le (Enregistrement [])), Undefined(* pas enocre traité *) 
 
 let rec ajouterListNomme ltn nt = 
     match ltn with
@@ -199,9 +209,9 @@ let rec analyse_type_instruction ltn tf i =
   | AstTds.Addition (a1,e1) -> let (na,ta) = analyse_type_affectable a1 in
                                   let (ne,te) = analyse_type_expression e1 in
                                     if ((est_compatible ta te) && (est_compatible ta Int) ) then 
-                                      Affectation (na,(Binaire(PlusInt, Affectable (na,2022), ne)))
+                                      Affectation (na,(Binaire(PlusInt, Affectable na, ne)))
                                     else if ((est_compatible ta te) && (est_compatible ta Rat)) then 
-                                      Affectation (na,(Binaire(PlusRat, Affectable (na,2022), ne)))
+                                      Affectation (na,(Binaire(PlusRat, Affectable na, ne)))
                                     else raise (TypeInattendu(ta, te))
   | AstTds.Typedeflocal (n,t) -> Typedeflocal (n,t)
 

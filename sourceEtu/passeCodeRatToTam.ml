@@ -91,6 +91,8 @@ struct
                             | _ -> ""  (* cas impossible *)
                             end
 
+      | Acces _ -> "" (* TODO *)
+
   (* analyse_tam_expression : AstType.expression -> string *)
   (* Paramètre e : l'expression à générer le code          *)
   (* Génère le code de l'expression                        *)
@@ -135,10 +137,12 @@ struct
     | New t -> "LOADL "^(string_of_int (getTaille t))^"\n" 
               ^"SUBR MAlloc \n" 
               (* réservation d'un emplacement mémoire dans le tas de la taille nécessaire au type t*)
-    | Affectable (a,_) -> (analyser_tam_affectable a true false)
+    | Affectable a -> (analyser_tam_affectable a true false)
     | Adresse ia -> let (dep,reg) = (get_dep_reg ia) in
                     "LOADA "^(string_of_int dep)^"["^reg^"]\n"
                     (* charge dans la pile l'emplacement en mémoire de la variable (dans le but de récuperer son adresse)*)
+
+    | Enregistrement _ -> "" (* TODO *)
 
                         
   (* analyse_tam_intruction : AstType.instruction list -> typ -> typ list -> string *)
@@ -193,6 +197,7 @@ struct
                   ^"RETURN ("^(string_of_int ttr)^") "^(string_of_int tparam)^"\n"
                   (* retour de la fonction avec la taille du type retour et la taille des paramètres appelés *)
     | Empty -> ""
+    | Typedeflocal _ -> ""
 
 
 

@@ -164,6 +164,7 @@ struct
 type affectable =
   | Deref of affectable
   | Ident of Tds.info_ast
+  | Acces of affectable * Tds.info_ast
   
 (* Opérateurs unaires de Rat - résolution de la surcharge *)
 type unaire = Numerateur | Denominateur
@@ -181,9 +182,10 @@ type expression =
   | Binaire of binaire * expression * expression
   (**** ajout pour les pointeurs ****)
   | Null
-  | Affectable of affectable * int
+  | Affectable of affectable
   | Adresse of Tds.info_ast
   | New of typ
+  | Enregistrement of expression list
 
 (* instructions existantes Rat *)
 (* = instruction de AstTds + informations associées aux identificateurs, mises à jour *)
