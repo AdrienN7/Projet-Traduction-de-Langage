@@ -10,26 +10,39 @@ struct
   type t1 = Ast.AstSyntax.programme
   type t2 = Ast.AstTds.programme
   
+  (* trouverIa : affectable -> info_ast  *)
+  (* Paramètre iaa1 : affectable         *)
+  (* Retourne l'info_ast de l'affectable *)
   let rec trouverIa iaa1 =
     match iaa1 with
     | Deref(a1) -> trouverIa a1
     | Ident(ia) -> ia
     | Acces _ -> failwith ("Impossible")
 
-  (*retorun ia de l'element dans la structure *)
+  (* trouvern : string -> info_ast list -> info_ast                  *)
+  (* Paramètre n : le nom du champ recherché                         *)
+  (* Paramètre lia : la liste des ast présente dans l'enregistrement *)
+  (* Retourne l'ia de du champ recherché dans l'enregistrement       *)
+  (* Erreur si il n'est pas présent dans l'enregistrement            *)
   let rec trouvern n lia =
     match lia with 
     | [] -> raise (MauvaiseUtilisationIdentifiant n) 
     | ia::q -> let info = info_ast_to_info ia in
                begin match info with
-                 | InfoVar(n1,_,_,_) -> if (n = n1) then ia else (trouvern n q)
+                  | InfoVar(n1,_,_,_) -> if (n = n1) then ia else (trouvern n q)
                   | InfoConst (n1,_) -> raise (MauvaiseUtilisationIdentifiant n1)
+                  (* les enregistrements n'ont pas de champ constant *)
                   | InfoTyp (n1,_) -> raise (MauvaiseUtilisationIdentifiant n1)
                   | InfoFun (n1,_,_) -> raise (MauvaiseUtilisationIdentifiant n1)
                   | InfoRecord (n1,_) -> if (n1 = n) then ia else (trouvern n q)
                end
 
-
+  (* trouverIAdeN : string -> affectable -> info_ast                  *)
+  (* Paramètre n : nom du champ recherché                             *)
+  (* Paramètre iaa1 : affectable où on cherche le champs              *)
+  (* Retourne l'info_ast correspondant à n dans l'affectable iaa1     *)
+  (* Erreur si l'affectable n'est pas un record ou pointeur de record *)
+  (* Erreur si n n'est pas défini dans l'enregistrement               *)
   let trouverIAdeN n iaa1 =
     let ia = trouverIa iaa1 in
     let info = info_ast_to_info ia in
@@ -41,6 +54,11 @@ struct
     | InfoTyp (n1,_) -> raise (MauvaiseUtilisationIdentifiant n1)
     | InfoFun (n1,_,_) -> raise (MauvaiseUtilisationIdentifiant n1)
 
+  (* analyse_tds_record : tds -> typ * string -> info_Ast                                       *)
+  (* Paramètre tds : la tds du programme                                                        *)
+  (* Paramètre (t,n) : un des champ défini dans la structure Record                             *)
+  (* Retourne l'ast_info de ce champ après avoir vérifié qu'il n'est pas déjà défini localement *)
+  (* Erreur si double décaration                                                                *)
   let analyse_tds_record tds (t,n)=
     match (chercherLocalement tds n) with
     | Some _ -> raise (DoubleDeclaration n)
@@ -49,9 +67,13 @@ struct
               ajouter tds n ia;
               ia
 
-
-  let  analyse_tds_td tds tdl = 
-    match tdl with
+  (* analyse_tds_td : tds -> AstSyntax.nommes -> nommes              *)
+  (* Paramètre tds : tds du programme                                *)
+  (* Paramètre tn : type nommé à ajouter à la tds                    *)
+  (* renvoie nommé après avoir vérifié qu'il n'était pas déjà defini *)
+  (* Erreur si double déclaraton                                     *)
+  let  analyse_tds_td tds tn = 
+    match tn with
     | AstSyntax.Typedefglobal (n,t) -> begin
                               match (chercherGlobalement tds n) with
                               | Some _ -> raise (DoubleDeclaration n)
@@ -163,16 +185,16 @@ let rec analyse_tds_instruction tds i =
             (* Vérification de la bonne utilisation des identifiants dans l'expression *)
             (* et obtention de l'expression transformée *) 
             let ne = analyse_tds_expression tds e in
+            let  info = 
             begin
             match t with 
             | Record lt -> let lia = List.map (analyse_tds_record tds) lt in
-                           let info = InfoRecord(n,lia) in
-                           let ia = (info_to_info_ast info) in
-                           ajouter tds n ia;
-                           Declaration (t, ia, ne)
+                           InfoRecord (n,lia)
+                           
             | _ ->
               (* Création de l'information associée à l'identfiant *)
-              let info = InfoVar (n,t, 0, "") in
+              InfoVar (n,t, 0, "") 
+            end in
               (* Création du pointeur sur l'information *)
               let ia = info_to_info_ast info in
               (* Ajout de l'information (pointeur) dans la tds *)
@@ -180,7 +202,7 @@ let rec analyse_tds_instruction tds i =
               (* Renvoie de la nouvelle déclaration où le nom a été remplacé par l'information 
               et l'expression remplacée par l'expression issue de l'analyse *)
               Declaration (t, ia, ne) 
-            end
+            
         | Some _ ->
             (* L'identifiant est trouvé dans la tds locale, 
             il a donc déjà été déclaré dans le bloc courant *) 
@@ -313,7 +335,7 @@ let analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li))  =
 (* Vérifie la bonne utilisation des identifiants et tranforme le programme
 en un programme de type AstTds.ast *)
 (* Erreur si mauvaise utilisation des identifiants *)
-let analyser (AstSyntax.Programme (tdl,fonctions,prog)) =
+let analyser (AstSyntax.Programme (tnl,fonctions,prog)) =
   (*creer la tds mere *)
   let tds = creerTDSMere () in
   (*analyse les fonction du programme *)
@@ -321,7 +343,7 @@ let analyser (AstSyntax.Programme (tdl,fonctions,prog)) =
   (*analyse le bloc du programme *)
   let nb = analyse_tds_bloc tds prog in
   (*analyse les types nommé globalement *)
-  let ntdl = List.map (analyse_tds_td tds) tdl in
+  let ntdl = List.map (analyse_tds_td tds) tnl in
   (* Renvoie la Structure d'un programme dans notre langage *)
   Programme (ntdl,nf,nb)
 

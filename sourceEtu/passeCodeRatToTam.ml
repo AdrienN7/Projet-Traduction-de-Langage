@@ -47,6 +47,11 @@ struct
     | Pointeur t1 -> getTaillePointeur t1
     | _ -> getTaille t
 
+  (* pas besoin de retraiter tous les cas déjà traités dans getTaille dans type.ml *)
+  let%test _ = getTaillePointeur (Pointeur Rat)  = 2
+  let%test _ = getTaillePointeur ((Pointeur Int))  = 1
+  let%test _ = getTaillePointeur (Pointeur (Pointeur Int))  = 1
+
 
   (* analyser_tam_affection : AstType.affectable -> bool -> bool -> string                   *)
   (* Paramètre a : affectable dont on doit générer le code                                   *)

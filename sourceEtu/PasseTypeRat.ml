@@ -61,9 +61,9 @@ struct
                    (*le cas si dessous ne doit jamais arriver *)
                   | InfoFun (n, _, _) -> raise (MauvaiseUtilisationIdentifiant n)
                   | InfoTyp (n,_) -> raise (MauvaiseUtilisationIdentifiant n)
-                  | InfoRecord _ -> failwith("TODO")
+                  | InfoRecord _ -> failwith("TODO") (* TODO *)
                   end
-    | AstTds.Acces (a,ia) -> let a1,t1 = (analyse_type_affectable a) in (Acces (a1,ia), t1) (* TODO *)
+    | AstTds.Acces (a,ia) -> let a1,t1 = (analyse_type_affectable a) in (Acces (a1,ia), t1) (* Tet ODO *)
 
 
 
@@ -132,12 +132,19 @@ let rec analyse_type_expression e =
                                                                   end)
                                                 le (Enregistrement [])), Undefined(* pas enocre traité *) 
 
+(* ajouterListNomme : (string*typ) list -> string * typ -> (string*typ) list *)
+(* Paramètre ltn : liste des types nommés                                    *)
+(* Paramètre nt : type nommé à ajouter à la liste                            *)
+(* Renvoie la liste des type nommés mis à jour                               *)                                           
 let rec ajouterListNomme ltn nt = 
     match ltn with
     | []   -> [nt]
     | t::q -> if (t = nt) then nt::q else (ajouterListNomme q nt)
 
-
+(* changer_type : string -> (string*typ) list -> typ              *)
+(* Paramètre ltn : liste des types nommés                         *)
+(* Paramètre tn : nom du type nommé dont on veut renvoyer le type *)
+(* Renvoie le type réel du type nommé                             *)
 let rec changer_type tn ltn = 
   match ltn with
   | [] -> raise (Erreur_type_nomme)
@@ -153,24 +160,18 @@ en une instruction de type AstType.instruction *)
 let rec analyse_type_instruction ltn tf i =
   match i with
   | AstTds.Declaration (t, ia, e) ->
-      (*modifier le type ici *)
+      (* modifier le type ici *)
+      let nt =
       begin
       match t with
-       | Tident n  ->
-        
-        let nt = changer_type n ltn in
-        modifier_type_info nt ia;
-        let (ne, te) = analyse_type_expression e in
-        if (est_compatible nt te) then Declaration (ia, ne)
-        else raise (TypeInattendu (te, nt))
-        
-      | _ ->
-        
-        modifier_type_info t ia;
-        let (ne, te) = analyse_type_expression e in
-        if (est_compatible t te) then Declaration (ia, ne)
-        else raise (TypeInattendu (te, t))
-      end
+      | Tident n  -> changer_type n ltn 
+      | _ -> t
+      end in
+      modifier_type_info nt ia;
+      let (ne, te) = analyse_type_expression e in
+      if (est_compatible nt te) then Declaration (ia, ne)
+      else raise (TypeInattendu (te, nt))
+      
   | AstTds.Affectation (a,e) ->
       let s , t = (analyse_type_affectable a) in
       let (ne,te) = analyse_type_expression e in

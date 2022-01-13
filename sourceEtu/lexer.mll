@@ -101,7 +101,7 @@ rule token = parse
 | ['a'-'z'](['A'-'Z''a'-'z''0'-'9']|"-"|"_")* as n
                { ident n }
 
-(* identifiants des type nommé*)
+(* identifiants des types nommés*)
 | ['A'-'Z'](['A'-'Z''a'-'z''0'-'9']|"-"|"_")* as tn 
                 { tident tn }
 

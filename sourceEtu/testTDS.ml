@@ -359,7 +359,8 @@ let%test_unit "testpointeurs" =
   let _ = compiler "../../fichiersRat/testprojet/testpointeurs.rat" in ()
 
 
-(* test Enregistrement *) (*
+(* test Enregistrement !!!!!!!!!!!Les tests commentés ne passent pas!!!!!!!!!!!!! *) 
+(*
 let%test_unit "testrecord1" = 
   let _ = compiler "../../fichiersRat/testprojet/record1.rat" in ()
 
@@ -368,7 +369,7 @@ let%test_unit "testrecord1" =
 
   let%test_unit "testrecord3" = 
   let _ = compiler "../../fichiersRat/testprojet/record3.rat" in ()
-  
+*)
 let%test_unit "testrecord4" = 
 try 
   let _ = compiler "../../fichiersRat/testprojet/record4.rat"
@@ -382,7 +383,7 @@ try
   in raise ErreurNonDetectee
 with
 | DoubleDeclaration("x") -> ()
-
+(*
 let%test_unit "testrecord6" = 
   let _ = compiler "../../fichiersRat/testprojet/record6.rat" in ()
 
@@ -392,7 +393,8 @@ try
   in raise ErreurNonDetectee
 with
 | MauvaiseUtilisationIdentifiant("x") -> ()
-
 *)
+
+
 
 
